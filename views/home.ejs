@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Online Junqi</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="A real-time multi-player junqi app">
+        <meta name="author" content="">
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/styles.css" rel="stylesheet">
+    </head>
+    <body>
+        <div id="banner" class="jumbotron">
+            <div class="container">
+                <h1 style="color: white;">Online Junqi</h1>
+                <p>
+                    The game Junqi (军旗), which translates to "army chess", is a Chinese board game that can now be played directly in your browser. 
+                    The objective of the game is to capture your opponent's flag.
+                </p>
+            </div>
+        </div>
+        <div class="container">
+            <table class="table ">
+              <tbody>
+                                  <tr>
+                  <td><h3>Join Game</h3></td>
+                  <td>
+                      <form id="joinForm" action="/join" method="POST" role="form">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="gameID">Select a Game</label>
+                                       <!-- <input id="gameID" type="text" name="game-id" class="form-control"> -->
+                                        
+                                        <!-- Displays a list of games in session -->
+                                        <select class="form-control" name="game-id">
+                                            <% for (var i = 0; i < listIDs.length; i++) { %>
+                                                <option value='<%= listIDs[i] %>'><%= listIDs[i] %></option>
+                                              <% } %>
+                                        </select>
+                                    </div>
+                                </div>    
+                            </div>
+                        <button type="submit" class="btn btn-primary">Join Game</button>
+                    </form>
+                    </td>
+                </tr>
+                <tr>
+                  <td><h3>New Game</h3></td>
+                  <td>
+                      <form id="startForm" action="/start" method="POST" role="form">
+                          <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Play as</label>
+                                        <div>
+                                            <div data-toggle="buttons" class="btn-group">
+                                                <label class="btn btn-default active">
+                                                    <input type="radio" name="player-color" value="blue" checked="checked">Blue
+                                                </label>
+                                                <label class="btn btn-default">
+                                                    <input type="radio" name="player-color" value="red">Red
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>      
+                        <button type="submit" class="btn btn-primary">Start Game</button>
+                    </form>
+                    </td>
+                </tr>
+
+              </tbody>
+            </table> 
+        </div>
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
+    </body>
+</html>

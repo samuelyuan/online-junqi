@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Online Junqi</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="A real-time multi-player junqi app">
+        <meta name="author" content="">
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/styles.css" rel="stylesheet">
+    </head>
+    <body>
+        <nav role="navigation" class="navbar navbar-inverse navbar-static-top">
+            <div class="navbar-header">
+                <a href="/" class="navbar-brand">Online Junqi</a>
+            </div>
+        </nav>
+        <div class="container">
+            <div id="messages"></div>
+            <div id="game">
+                <div id="title-bar">
+                    <span>Game:&nbsp;</span><strong><%= gameID %></strong>
+                    <div class="row">
+                    <div class="col-md-4">
+                        <button id="finishSetup" type="submit" class="btn btn-sm btn-default">Finish Setup</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="forfeit" class="btn btn-sm btn-danger pull-right" data-toggle="modal" data-target="#forfeit-game">Surrender</button>
+                    </div>
+                </div>
+                </div>
+                
+                
+               
+                <div id="opponent" class="player-info">
+                    <strong>...</strong>
+                    <span class="status pull-right"></span>
+                    <!-- <ul class="captured-pieces list-inline"></ul> -->
+                </div>
+                
+                <table id="board">
+                    <tr><td class="top-left-corner"></td><td class="top-edge"></td><td class="top-edge"></td><td class="top-edge"></td><td class="top-edge"></td><td class="top-edge"></td><td class="top-right-corner"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="left-edge"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="square"></td><td class="right-edge"></td></tr>
+                    <tr><td class="bottom-left-corner"></td><td class="bottom-edge"></td><td class="bottom-edge"></td><td class="bottom-edge"></td><td class="bottom-edge"></td><td class="bottom-edge"></td><td class="bottom-right-corner"></td></tr>
+                </table> 
+                
+                <div id="you" class="player-info">
+                    <strong>...</strong>
+                    <span class="status pull-right"></span>
+                    <!-- <ul class="captured-pieces list-inline"></ul> -->
+                </div>
+            </div>
+            
+            <div id="game-over" role="dialog" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-body text-center"><h2 class="alert"></h2></div><div class="modal-footer"><a href="/" class="btn btn-primary">Continue</a></div></div>
+                </div>
+            </div>
+            
+            <div id="forfeit-game" role="dialog" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body text-center"><h2>Are you sure you want to surrender?</h2></div>
+                        <div class="modal-footer">
+                            <button id="cancel-forfeit" class="btn btn-default">Cancel</button>
+                            <button id="confirm-forfeit" class="btn btn-primary">Surrender</button>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/client.js"></script>
+        <script src="/js/fastclick.js"></script>
+        <script>
+            $(document).ready(function() {
+                  FastClick.attach(document.body);
+                  window.Client({
+                    gameID      : '<%= gameID %>',
+                    playerColor : '<%= playerColor %>',
+                    playerName  : '<%= playerName %>'
+                  });
+            });
+        </script>
+    </body>
+</html>
