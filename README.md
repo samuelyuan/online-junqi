@@ -8,7 +8,9 @@ You can create a new game or join an existing one.
 
 The objective of the game is to capture your opponent's flag. 
 
-<b>Getting Started</b>
+Getting Started
+
+---
 
 1. Clone the project
 
@@ -16,7 +18,17 @@ The objective of the game is to capture your opponent's flag.
 
 3. Run nodejs
 
-<b>Credits</b>
+Screenshots
+
+---
+
+![Menu](https://github.com/samuelyuan/online-junqi/raw/master/images/menu.png)
+
+![Game](https://github.com/samuelyuan/online-junqi/raw/master/images/game.png)
+
+Credits
+
+---
 
 While writing the code, I looked at an existing online multiplayer nodejs app on Github called the
 Socket.io Chess project. Though I have had to modify a lot of the code, it served as a good framework for learning 
