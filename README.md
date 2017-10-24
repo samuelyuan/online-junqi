@@ -9,7 +9,6 @@ You can create a new game or join an existing one.
 The objective of the game is to capture your opponent's flag. 
 
 Getting Started
-
 ---
 
 1. Clone the project
@@ -19,15 +18,12 @@ Getting Started
 3. Run nodejs
 
 Screenshots
-
 ---
 
-![Menu](https://github.com/samuelyuan/online-junqi/raw/master/images/menu.png)
-
-![Game](https://github.com/samuelyuan/online-junqi/raw/master/images/game.png)
+<img src="https://github.com/samuelyuan/online-junqi/raw/master/images/menu.png" alt="Menu" width="400px" height="200px" />
+<img src="https://github.com/samuelyuan/online-junqi/raw/master/images/game.png" alt="Gane" width="400px" height="200px" />
 
 Credits
-
 ---
 
 While writing the code, I looked at an existing online multiplayer nodejs app on Github called the
