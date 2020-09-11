@@ -6,7 +6,7 @@ http://junqi.herokuapp.com/
 
 You can create a new game or join an existing one.
 
-The objective of the game is to capture your opponent's flag. 
+The objective of the game is to capture your opponent's flag.
 
 Getting Started
 ---
@@ -14,8 +14,15 @@ Getting Started
 1. Clone the project
 
 2. Install npm dependencies
+```
+cd online-junqi
+npm install
+```
 
 3. Run nodejs
+```
+node server.js
+```
 
 Screenshots
 ---
@@ -27,7 +34,7 @@ Credits
 ---
 
 While writing the code, I looked at an existing online multiplayer nodejs app on Github called the
-Socket.io Chess project. Though I have had to modify a lot of the code, it served as a good framework for learning 
+Socket.io Chess project. Though I have had to modify a lot of the code, it served as a good framework for learning
 and experimenting.
 
 https://github.com/thebinarypenguin/socket.io-chess
