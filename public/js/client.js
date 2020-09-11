@@ -15,7 +15,7 @@ var Client = (function(window) {
     var gameClasses = null;
 
     var selection   = null;
-    
+
     var prevSelectedSquare = null;
     var curSelectedSquare = null;
     var swapStr = null;
@@ -26,7 +26,7 @@ var Client = (function(window) {
     /**
     * Initialize the UI
     */
-    var init = function(config) 
+    var init = function(config)
     {
         gameID      = config.gameID;
         playerColor = config.playerColor;
@@ -65,26 +65,26 @@ var Client = (function(window) {
     /**
     * Assign square IDs and labels based on player's perspective
     */
-    var assignSquares = function() 
+    var assignSquares = function()
     {
         var fileLabels = ['A', 'B', 'C', 'D', 'E'];
         var rankLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
         var squareIDs  = [
             'a12', 'b12', 'c12', 'd12', 'e12',
-            'a11', 'b11', 'c11', 'd11', 'e11', 
+            'a11', 'b11', 'c11', 'd11', 'e11',
             'a10', 'b10', 'c10', 'd10', 'e10',
             'a9', 'b9', 'c9', 'd9', 'e9',
             'a8', 'b8', 'c8', 'd8', 'e8',
-            'a7', 'b7', 'c7', 'd7', 'e7', 
+            'a7', 'b7', 'c7', 'd7', 'e7',
             'a6', 'b6', 'c6', 'd6', 'e6',
             'a5', 'b5', 'c5', 'd5', 'e5',
             'a4', 'b4', 'c4', 'd4', 'e4',
-            'a3', 'b3', 'c3', 'd3', 'e3', 
+            'a3', 'b3', 'c3', 'd3', 'e3',
             'a2', 'b2', 'c2', 'd2', 'e2',
             'a1', 'b1', 'c1', 'd1', 'e1'
         ];
 
-        if (playerColor === 'red') 
+        if (playerColor === 'red')
         {
             fileLabels.reverse();
             rankLabels.reverse();
@@ -100,10 +100,10 @@ var Client = (function(window) {
         // Set square IDs
         squares.each(function(i) { $(this).attr('id', squareIDs[i]); });
     };
-    
+
     var callbackHighlightSwap = function(color, rank)
     {
-        return function(ev) {  
+        return function(ev) {
             //for setup, swap pieces
             for (var i = 0; i < gameState.players.length; i++)
             {
@@ -114,32 +114,32 @@ var Client = (function(window) {
             }
         }
     }
-    
+
     var callbackHighlightMoves = function(color, rank)
     {
-        return function(ev) {            
+        return function(ev) {
             //Show moves for player
-            if (gameState.activePlayer && gameState.activePlayer.color === playerColor) 
+            if (gameState.activePlayer && gameState.activePlayer.color === playerColor)
             {
                 highlightValidMoves(color + rank, ev.target);
             }
         }
     };
-    
+
   /**
    * Attach DOM event handlers
    */
-  var attachDOMEventHandlers = function() 
+  var attachDOMEventHandlers = function()
   {
     // Highlight valid moves for red pieces
-    if (playerColor === 'red') 
+    if (playerColor === 'red')
     {
         var baseString = '.red.rank';
         for (var i = 0; i <= 11; i++)
         {
             container.on('click', baseString + i.toString(), callbackHighlightSwap('r', i.toString()));
         }
-        
+
         for (var i = 0; i < 10; i++)
         {
             container.on('click', baseString + i.toString(), callbackHighlightMoves('r', i.toString()));
@@ -147,14 +147,14 @@ var Client = (function(window) {
     }
 
     // Highlight valid moves for blue pieces
-    if (playerColor === 'blue') 
+    if (playerColor === 'blue')
     {
         var baseString = '.blue.rank';
         for (var i = 0; i <= 11; i++)
         {
             container.on('click', baseString + i.toString(), callbackHighlightSwap('b', i.toString()));
         }
-        
+
         for (var i = 0; i < 10; i++)
         {
             container.on('click', baseString + i.toString(), callbackHighlightMoves('b', i.toString()));
@@ -181,7 +181,7 @@ var Client = (function(window) {
         messages.empty();
         socket.emit('move', {gameID: gameID, move: m});
     });
-      
+
     //dies to a higher rank
     container.on('click', '.valid-dies', function(ev) {
         var m = generateMoveString(ev.target, 'o');
@@ -189,7 +189,7 @@ var Client = (function(window) {
         messages.empty();
         socket.emit('move', {gameID: gameID, move: m});
     });
-      
+
     //both attacker and defender die
     container.on('click', '.valid-equal', function(ev) {
         var m = generateMoveString(ev.target, '=');
@@ -197,16 +197,16 @@ var Client = (function(window) {
         messages.empty();
         socket.emit('move', {gameID: gameID, move: m});
     });
-      
-      
+
+
     //Swap pieces
     container.on('click', '.valid-swap', function(ev) {
         var m = swapStr;
-        
+
         messages.empty();
         socket.emit('move', {gameID: gameID, move: m});
     });
-      
+
     //Finish setup
       container.on('click', '#finishSetup', function(ev) {
            socket.emit('finishSetup', gameID);
@@ -216,16 +216,16 @@ var Client = (function(window) {
     // Forfeit game
     container.on('click', '#forfeit', function(ev) {
         showForfeitPrompt(function(confirmed) {
-            if (confirmed) 
+            if (confirmed)
             {
               messages.empty();
               socket.emit('forfeit', gameID);
             }
         });
-        
+
         });
     };
-    
+
     var generateMoveString = function(destinationSquare, symbol)
     {
         var piece = selection.color+selection.piece;
@@ -245,7 +245,7 @@ var Client = (function(window) {
     /**
     * Attach Socket.IO event handlers
     */
-    var attachSocketEventHandlers = function() 
+    var attachSocketEventHandlers = function()
     {
         // Update UI with new game state
         socket.on('update', function(data) {
@@ -260,8 +260,8 @@ var Client = (function(window) {
             showErrorMessage(data);
         });
     };
-    
-    var highlightValidSwap = function(piece, selectedSquare) 
+
+    var highlightValidSwap = function(piece, selectedSquare)
     {
         var square = $(selectedSquare);
         var move   = null;
@@ -274,7 +274,7 @@ var Client = (function(window) {
             rank:  square.attr('id').substr(1, square.attr('id').length - 1)
         };
 
-        // Highlight the selected square        
+        // Highlight the selected square
         squares.removeClass('selected');
         square.addClass('selected');
 
@@ -283,13 +283,13 @@ var Client = (function(window) {
 
         // Highlight any valid moves
         squares.removeClass('valid-swap');
-        for (var i = 0; i < gameState.validSwap.length; i++) 
+        for (var i = 0; i < gameState.validSwap.length; i++)
         {
             move = gameState.validSwap[i];
 
             if (move.type === 'swap')
-            { 
-                if (move.pieceCode === piece && move.startSquare === square.attr('id')) 
+            {
+                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
                 {
                     prevSelectedSquare = square.attr('id');
                     $('#'+move.endSquare).addClass('valid-swap');
@@ -301,7 +301,7 @@ var Client = (function(window) {
     /**
     * Highlight valid moves for the selected piece
     */
-    var highlightValidMoves = function(piece, selectedSquare) 
+    var highlightValidMoves = function(piece, selectedSquare)
     {
         var square = $(selectedSquare);
         var move   = null;
@@ -320,45 +320,45 @@ var Client = (function(window) {
 
         // Highlight any valid moves
         squares.removeClass('valid-move valid-capture valid-equal valid-dies');
-        for (var i=0; i<gameState.validMoves.length; i++) 
+        for (var i=0; i<gameState.validMoves.length; i++)
         {
             move = gameState.validMoves[i];
 
             if (move.type === 'move')
             {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id')) 
+                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
                 {
                     $('#'+move.endSquare).addClass('valid-move');
                 }
             }
 
-            if (move.type === 'capture') 
+            if (move.type === 'capture')
             {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id')) 
+                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
                 {
-                    if (move.captureSquare === move.endSquare) 
+                    if (move.captureSquare === move.endSquare)
                     {
                         $('#'+move.endSquare).addClass('valid-capture');
                     }
                 }
             }
 
-            if (move.type === 'dies') 
+            if (move.type === 'dies')
             {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id')) 
+                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
                 {
-                    if (move.dieSquare === move.startSquare) 
+                    if (move.dieSquare === move.startSquare)
                     {
                         $('#'+move.endSquare).addClass('valid-dies');
                     }
                 }
             }
 
-            if (move.type === 'equal') 
+            if (move.type === 'equal')
             {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id')) 
+                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
                 {
-                    if (move.dieSquare1 === move.startSquare && move.dieSquare2 === move.endSquare) 
+                    if (move.dieSquare1 === move.startSquare && move.dieSquare2 === move.endSquare)
                     {
                         $('#'+move.endSquare).addClass('valid-equal');
                     }
@@ -370,7 +370,7 @@ var Client = (function(window) {
     /**
     * Clear valid move highlights
     */
-    var clearHighlights = function() 
+    var clearHighlights = function()
     {
         squares.removeClass('selected');
         squares.removeClass('valid-move');
@@ -379,7 +379,7 @@ var Client = (function(window) {
         squares.removeClass('valid-equal');
         squares.removeClass('valid-swap');
     };
-    
+
   /**
    * Update UI from game state
    */
@@ -389,15 +389,15 @@ var Client = (function(window) {
     var container, name, status, captures = null;
 
     // Update player info
-    for (var i = 0; i < gameState.players.length; i++) 
+    for (var i = 0; i < gameState.players.length; i++)
     {
         // Determine if player is you or opponent
-        if (gameState.players[i].color === playerColor) 
+        if (gameState.players[i].color === playerColor)
         {
           you = gameState.players[i];
           container = $('#you');
         }
-        else if (gameState.players[i].color !== playerColor) 
+        else if (gameState.players[i].color !== playerColor)
         {
           opponent = gameState.players[i];
           container = $('#opponent');
@@ -408,7 +408,7 @@ var Client = (function(window) {
         captures = container.find('ul');
 
         // Name
-        if (gameState.players[i].name) 
+        if (gameState.players[i].name)
         {
             //if the player quits midgame, don't show any name
             if (gameState.players[i].joined === false)
@@ -424,11 +424,11 @@ var Client = (function(window) {
 
         // Active Status
         container.removeClass('active-player');
-        if (gameState.activePlayer && gameState.activePlayer.color === gameState.players[i].color) 
+        if (gameState.activePlayer && gameState.activePlayer.color === gameState.players[i].color)
         {
           container.addClass('active-player');
         }
-        
+
         //Setup Status
         container.removeClass('setup-player ready-player');
         if (gameState.players[i].isSetup === false)
@@ -439,7 +439,7 @@ var Client = (function(window) {
         {
             container.addClass('ready-player');
         }
-        
+
       // Check Status
       /*status.removeClass('label label-danger').text('');
       if (gameState.players[i].inCheck) {
@@ -456,16 +456,16 @@ var Client = (function(window) {
     }
 
     // Update board
-    for (var sq in gameState.board) 
+    for (var sq in gameState.board.boardState)
     {
-        $('#'+sq).removeClass(gameClasses).addClass(getPieceClasses(gameState.board[sq]));
+        $('#'+sq).removeClass(gameClasses).addClass(getPieceClasses(gameState.board.boardState[sq]));
     }
 
     // Highlight last move
-    if (gameState.lastMove) 
+    if (gameState.lastMove)
     {
         if (gameState.lastMove.type === 'move' || gameState.lastMove.type === 'capture' ||
-           gameState.lastMove.type === 'dies' || gameState.lastMove.type === 'equal') 
+           gameState.lastMove.type === 'dies' || gameState.lastMove.type === 'equal')
         {
             $('#'+gameState.lastMove.startSquare).addClass('last-move');
             $('#'+gameState.lastMove.endSquare).addClass('last-move');
@@ -473,21 +473,21 @@ var Client = (function(window) {
     }
 
     // Test for checkmate
-    if (gameState.status === 'checkmate') 
+    if (gameState.status === 'checkmate')
     {
         if (opponent.inCheck) { showGameOverMessage('checkmate-win');  }
         if (you.inCheck)      { showGameOverMessage('checkmate-lose'); }
     }
 
     // Test for stalemate
-    if (gameState.status === 'nopieces') 
+    if (gameState.status === 'nopieces')
     {
         if (opponent.hasMoveablePieces === false) { showGameOverMessage('nopieces-win'); }
-        if (you.hasMoveablePieces === false) { showGameOverMessage('nopieces-lose'); }  
+        if (you.hasMoveablePieces === false) { showGameOverMessage('nopieces-lose'); }
     }
 
     // Test for forfeit
-    if (gameState.status === 'forfeit') 
+    if (gameState.status === 'forfeit')
     {
         if (opponent.forfeited) { showGameOverMessage('forfeit-win');  }
         if (you.forfeited)      { showGameOverMessage('forfeit-lose'); }
@@ -552,7 +552,7 @@ var Client = (function(window) {
    * Get the corresponding CSS classes for a given piece
    */
   var getPieceClasses = function(piece) {
-      if (piece == null) 
+      if (piece == null)
       {
           return 'empty';
       }
@@ -561,14 +561,14 @@ var Client = (function(window) {
       var className = '';
       var pieceRank = getPieceRank(piece);
 
-      //Check to make sure pieces are setup  
+      //Check to make sure pieces are setup
       //If your opponent's pieces aren't setup, don't display anything
       if (playerColor[0] !== pieceColor)
       {
-            for (var i = 0; i < gameState.players.length; i++) 
+            for (var i = 0; i < gameState.players.length; i++)
             {
                 // Determine if player is you or opponent
-                if (gameState.players[i].color !== playerColor) 
+                if (gameState.players[i].color !== playerColor)
                 {
                     //Not finished setup, so don't show anything
                     if (gameState.players[i].isSetup === false)
@@ -578,17 +578,17 @@ var Client = (function(window) {
                 }
             }
       }
-      
+
       //Don't reveal any of your opponent's pieces (the only exception is the flag which can be revealed after the commander dies)
       if (playerColor[0] !== pieceColor)
-      {   
+      {
           //Display flag when commander dies
           if (pieceRank === '11')
           {
-                for (var i = 0; i < gameState.players.length; i++) 
+                for (var i = 0; i < gameState.players.length; i++)
                 {
                     // Determine if player is you or opponent
-                    if (gameState.players[i].color !== playerColor) 
+                    if (gameState.players[i].color !== playerColor)
                     {
                         //If the opponent lost the commander, then reveal flag
                         if (gameState.players[i].hasCommander === false)
@@ -606,7 +606,7 @@ var Client = (function(window) {
                     }
                 }
           }
-          
+
           //Never display any other piece's rank
           if (playerColor[0] !== 'b')
           {
@@ -617,26 +617,26 @@ var Client = (function(window) {
               return 'facedown red';
           }
       }
-      
-      if (pieceColor === 'b') 
+
+      if (pieceColor === 'b')
       {
           className += 'blue ';
-      } 
-      else if (pieceColor === 'r') 
+      }
+      else if (pieceColor === 'r')
       {
           className += 'red ';
       }
-      
+
       className += 'rank' + pieceRank;
-      
-      if (piece[piece.length - 1] === '_') 
+
+      if (piece[piece.length - 1] === '_')
       {
-         className += ' not-moved';      
-      } 
-      
+         className += ' not-moved';
+      }
+
       return className;
   };
-    
+
     var getPieceRank = function(piece)
     {
         if (piece[piece.length - 1] === '_')
@@ -647,8 +647,8 @@ var Client = (function(window) {
         {
             lengthRank = piece.length - 1;
         }
-      
-        return piece.substr(1, lengthRank);  
+
+        return piece.substr(1, lengthRank);
     };
 
   return init;
