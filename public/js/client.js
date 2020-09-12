@@ -35,6 +35,43 @@ var Client = (function(window) {
         container   = $('#game');
         messages    = $('#messages');
         board       = $('#board');
+
+        // Dynamically create board because most of the rows and columns are the same
+
+        // Top row border
+        var topRow = "";
+        topRow += "<tr>";
+        topRow += "<td class='top-left-corner'></td>";
+        for (var col = 1; col <= 5; col++) {
+          topRow += "<td class='top-edge'></td>";
+        }
+        topRow += "<td class='top-right-corner'></td>";
+        topRow += "</tr>";
+        board.append(topRow);
+
+        // Create a new row to display pieces
+        for (var row = 1; row <= 12; row++) {
+          var curRow = "";
+          curRow += "<tr>";
+          curRow += "<td class='left-edge'></td>";
+          for (var col = 1; col <= 5; col++) {
+            curRow += "<td class='square'></td>";
+          }
+          curRow += "<td class='right-edge'></td>";
+          curRow += "</tr>";
+          board.append(curRow);
+        }
+
+        // Bottom row border
+        var bottomRow = "<tr>";
+        bottomRow += "<td class='bottom-left-corner'></td>";
+        for (var col = 1; col <= 5; col++) {
+          bottomRow += "<td class='bottom-edge'></td>";
+        }
+        bottomRow += "<td class='bottom-right-corner'></td>";
+        bottomRow += "</tr>";
+        board.append(bottomRow);
+
         squares     = board.find('.square');
         setupButton = $('#finishSetup');
 
