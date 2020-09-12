@@ -37,13 +37,13 @@ table { border-collapse: collapse; }
  * Game Board
  */
 
-#board { 
-    margin: 0 auto 0 auto; 
-    background-image: url("../img/map.png"); 
-    background-size: cover; 
-    background-repeat: no-repeat; 
-    background-size: 340px 480px; 
-    background-position: center; 
+#board {
+    margin: 0 auto 0 auto;
+    background-image: url("../img/map.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-size: 340px 480px;
+    background-position: center;
 }
 
 #board .square {
@@ -83,9 +83,7 @@ table { border-collapse: collapse; }
 
 #board .selected                        { border-style: solid; border-color: #049cdb; }
 #board .valid-move:before               { color: black; content: "\25cf"; }
-#board .valid-capture:before            { border-style: solid; border-color: black;  }
-#board .valid-dies:before               { border-style: solid; border-color: black;  }
-#board .valid-equal:before               { border-style: solid; border-color: black;  }
+#board .valid-attack:before             { border-style: solid; border-color: black;  }
 #board .valid-swap:before               { border-style: solid; border-color: black;  }
 
 /*
@@ -103,7 +101,7 @@ table { border-collapse: collapse; }
  */
 
 .facedown.blue:before {
-    content: "默认";   
+    content: "默认";
     color: #3B5999;
     background-color: #108FE8;
     border-left: solid 1px #2E4476;
@@ -113,7 +111,7 @@ table { border-collapse: collapse; }
 }
 
 .facedown.red:before {
-    content: "默认";   
+    content: "默认";
     color: #DE463B;
     background-color: #DE463B;
     border-left: solid 1px #C02B21;

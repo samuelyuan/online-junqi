@@ -79,7 +79,7 @@ var Client = (function(window) {
         forfeitPrompt       = $('#forfeit-game');
 
         gameClasses = "red blue rank0 rank1 rank2 rank3 rank4 rank5 rank6 rank7 rank8 rank9 rank10 rank11 not-moved empty selected " +
-                      "valid-move valid-capture valid-dies valid-equal valid-swap last-move";
+                      "valid-move valid-attack valid-swap last-move";
 
         // Create socket connection
         socket = io.connect();
@@ -211,30 +211,13 @@ var Client = (function(window) {
         socket.emit('move', {gameID: gameID, move: m});
     });
 
-    // Perform a regular capture
-    container.on('click', '.valid-capture', function(ev) {
+    // Attack the opponent's piece
+    container.on('click', '.valid-attack', function(ev) {
         var m = generateMoveString(ev.target, 'x');
 
         messages.empty();
         socket.emit('move', {gameID: gameID, move: m});
     });
-
-    //dies to a higher rank
-    container.on('click', '.valid-dies', function(ev) {
-        var m = generateMoveString(ev.target, 'o');
-
-        messages.empty();
-        socket.emit('move', {gameID: gameID, move: m});
-    });
-
-    //both attacker and defender die
-    container.on('click', '.valid-equal', function(ev) {
-        var m = generateMoveString(ev.target, '=');
-
-        messages.empty();
-        socket.emit('move', {gameID: gameID, move: m});
-    });
-
 
     //Swap pieces
     container.on('click', '.valid-swap', function(ev) {
@@ -276,7 +259,7 @@ var Client = (function(window) {
         dest.removeClass('empty').addClass(getPieceClasses(piece));
 
         // Return move string
-        return piece + ' ' + selection.file + selection.rank + ' ' + symbol + ' ' + dest.attr('id');
+        return selection.file + selection.rank + ' ' + symbol + ' ' + dest.attr('id');
     }
 
     /**
@@ -316,7 +299,7 @@ var Client = (function(window) {
         square.addClass('selected');
 
         curSelectedSquare = square.attr('id');
-        swapStr = piece + ' ' + curSelectedSquare + ' ' + 's' + ' ' + prevSelectedSquare;
+        swapStr = curSelectedSquare + ' ' + 's' + ' ' + prevSelectedSquare;
 
         // Highlight any valid moves
         squares.removeClass('valid-swap');
@@ -326,7 +309,7 @@ var Client = (function(window) {
 
             if (move.type === 'swap')
             {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
+                if (move.startSquare === square.attr('id'))
                 {
                     prevSelectedSquare = square.attr('id');
                     $('#'+move.endSquare).addClass('valid-swap');
@@ -356,49 +339,25 @@ var Client = (function(window) {
         square.addClass('selected');
 
         // Highlight any valid moves
-        squares.removeClass('valid-move valid-capture valid-equal valid-dies');
+        squares.removeClass('valid-move valid-attack');
         for (var i=0; i<gameState.validMoves.length; i++)
         {
             move = gameState.validMoves[i];
 
             if (move.type === 'move')
             {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
+                // Highlight empty squares to move to
+                if (move.startSquare === square.attr('id'))
                 {
                     $('#'+move.endSquare).addClass('valid-move');
                 }
             }
-
-            if (move.type === 'capture')
+            else if (move.type === 'attack')
             {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
+                // Highlight squares with enemy pieces
+                if (move.startSquare === square.attr('id'))
                 {
-                    if (move.captureSquare === move.endSquare)
-                    {
-                        $('#'+move.endSquare).addClass('valid-capture');
-                    }
-                }
-            }
-
-            if (move.type === 'dies')
-            {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
-                {
-                    if (move.dieSquare === move.startSquare)
-                    {
-                        $('#'+move.endSquare).addClass('valid-dies');
-                    }
-                }
-            }
-
-            if (move.type === 'equal')
-            {
-                if (move.pieceCode === piece && move.startSquare === square.attr('id'))
-                {
-                    if (move.dieSquare1 === move.startSquare && move.dieSquare2 === move.endSquare)
-                    {
-                        $('#'+move.endSquare).addClass('valid-equal');
-                    }
+                    $('#'+move.endSquare).addClass('valid-attack');
                 }
             }
         }
@@ -411,9 +370,7 @@ var Client = (function(window) {
     {
         squares.removeClass('selected');
         squares.removeClass('valid-move');
-        squares.removeClass('valid-capture');
-        squares.removeClass('valid-dies');
-        squares.removeClass('valid-equal');
+        squares.removeClass('valid-attack');
         squares.removeClass('valid-swap');
     };
 
@@ -501,8 +458,7 @@ var Client = (function(window) {
     // Highlight last move
     if (gameState.lastMove)
     {
-        if (gameState.lastMove.type === 'move' || gameState.lastMove.type === 'capture' ||
-           gameState.lastMove.type === 'dies' || gameState.lastMove.type === 'equal')
+        if (gameState.lastMove.type === 'move' || gameState.lastMove.type === 'attack')
         {
             $('#'+gameState.lastMove.startSquare).addClass('last-move');
             $('#'+gameState.lastMove.endSquare).addClass('last-move');
@@ -589,8 +545,7 @@ var Client = (function(window) {
    * Get the corresponding CSS classes for a given piece
    */
   var getPieceClasses = function(piece) {
-      if (piece == null)
-      {
+      if (piece == null) {
           return 'empty';
       }
 
@@ -598,50 +553,26 @@ var Client = (function(window) {
       var className = '';
       var pieceRank = getPieceRank(piece);
 
-      //Check to make sure pieces are setup
-      //If your opponent's pieces aren't setup, don't display anything
-      if (playerColor[0] !== pieceColor)
-      {
-            for (var i = 0; i < gameState.players.length; i++)
-            {
-                // Determine if player is you or opponent
-                if (gameState.players[i].color !== playerColor)
-                {
-                    //Not finished setup, so don't show anything
-                    if (gameState.players[i].isSetup === false)
-                    {
-                        return '';
-                    }
-                }
-            }
-      }
-
       //Don't reveal any of your opponent's pieces (the only exception is the flag which can be revealed after the commander dies)
       if (playerColor[0] !== pieceColor)
       {
+          //Check to make sure pieces are setup
+          //If your opponent's pieces aren't setup, don't display anything
+          if (isPieceInOpponentSetup(pieceColor, playerColor)) {
+            return '';
+          }
+
           //Display flag when commander dies
-          if (pieceRank === '11')
-          {
-                for (var i = 0; i < gameState.players.length; i++)
-                {
-                    // Determine if player is you or opponent
-                    if (gameState.players[i].color !== playerColor)
-                    {
-                        //If the opponent lost the commander, then reveal flag
-                        if (gameState.players[i].hasCommander === false)
-                        {
-                            //Determine the opponent's color (if you're blue, the opponent must be red)
-                            if (playerColor[0] === 'r')
-                            {
-                                return 'blue rank11';
-                            }
-                            else if (playerColor[0] === 'b')
-                            {
-                                return 'red rank11';
-                            }
-                        }
-                    }
-                }
+          if (shouldRevealOpponentFlag(pieceColor, pieceRank, playerColor)) {
+            //Determine the opponent's color (if you're blue, the opponent must be red)
+            if (playerColor[0] === 'r')
+            {
+                return 'blue rank11';
+            }
+            else if (playerColor[0] === 'b')
+            {
+                return 'red rank11';
+            }
           }
 
           //Never display any other piece's rank
@@ -673,6 +604,65 @@ var Client = (function(window) {
 
       return className;
   };
+
+  // currentPieceColor is "r" or "b"
+  // playerColor can be "red" or "blue"
+  var isPieceInOpponentSetup = function(currentPieceColor, playerColor) {
+    // If player owns that piece, it should not be shown
+    if (playerColor[0] === currentPieceColor) {
+      return false;
+    }
+
+    // Find the owner of that piece
+    var indexOwner = -1;
+    for (var i = 0; i < gameState.players.length; i++) {
+      if (gameState.players[i].color[0] === currentPieceColor) {
+        indexOwner = i;
+        break;
+      }
+    }
+
+    // The piece doesn't have an owner
+    // Should not reach this point
+    if (indexOwner == -1) {
+      return false;
+    }
+
+    // The other player is not finished seting up the game
+    return gameState.players[indexOwner].isSetup === false
+  }
+
+  // currentPieceColor is "r" or "b"
+  // playerColor can be "red" or "blue"
+  var shouldRevealOpponentFlag = function(currentPieceColor, pieceRank, playerColor) {
+    const RANK_FLAG = "11";
+
+    // If player owns that piece, it will already be revealed
+    if (playerColor[0] === currentPieceColor) {
+      return false;
+    }
+
+    // If this piece is not the flag, it should not be revealed
+    if (pieceRank !== RANK_FLAG) {
+      return false;
+    }
+
+    // Find the owner of that piece
+    var indexOwner = -1;
+    for (var i = 0; i < gameState.players.length; i++) {
+      if (gameState.players[i].color[0] === currentPieceColor) {
+        indexOwner = i;
+        break;
+      }
+    }
+
+    if (indexOwner == -1) {
+      return false;
+    }
+
+    // Reveal the flag if that player lost its commander.
+    return gameState.players[indexOwner].hasCommander === false;
+  }
 
     var getPieceRank = function(piece)
     {
