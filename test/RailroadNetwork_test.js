@@ -50,14 +50,14 @@ describe('Graph', function () {
   describe('#getAllRailroadsFromSquareIntersection()', function () {
     it('Return all railroads from square as a flat list', function () {
       var singleRail = railroadNetwork.getAllRailroadsFromSquare("a2");
-      assert.equal(singleRail.length, 10);
+      assert.equal(singleRail.size, 9);
     });
   });
 
   describe('#getAllRailroadsFromSquareNotIntersection()', function () {
     it('Return all railroads from square as a flat list', function () {
       var singleRail = railroadNetwork.getAllRailroadsFromSquare("a4");
-      assert.equal(singleRail.length, 5);
+      assert.equal(singleRail.size, 5);
     });
   });
 

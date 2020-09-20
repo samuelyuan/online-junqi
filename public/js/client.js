@@ -36,41 +36,7 @@ var Client = (function(window) {
         messages    = $('#messages');
         board       = $('#board');
 
-        // Dynamically create board because most of the rows and columns are the same
-
-        // Top row border
-        var topRow = "";
-        topRow += "<tr>";
-        topRow += "<td class='top-left-corner'></td>";
-        for (var col = 1; col <= 5; col++) {
-          topRow += "<td class='top-edge'></td>";
-        }
-        topRow += "<td class='top-right-corner'></td>";
-        topRow += "</tr>";
-        board.append(topRow);
-
-        // Create a new row to display pieces
-        for (var row = 1; row <= 12; row++) {
-          var curRow = "";
-          curRow += "<tr>";
-          curRow += "<td class='left-edge'></td>";
-          for (var col = 1; col <= 5; col++) {
-            curRow += "<td class='square'></td>";
-          }
-          curRow += "<td class='right-edge'></td>";
-          curRow += "</tr>";
-          board.append(curRow);
-        }
-
-        // Bottom row border
-        var bottomRow = "<tr>";
-        bottomRow += "<td class='bottom-left-corner'></td>";
-        for (var col = 1; col <= 5; col++) {
-          bottomRow += "<td class='bottom-edge'></td>";
-        }
-        bottomRow += "<td class='bottom-right-corner'></td>";
-        bottomRow += "</tr>";
-        board.append(bottomRow);
+        generateBoardCSS(board);
 
         squares     = board.find('.square');
         setupButton = $('#finishSetup');
@@ -98,6 +64,44 @@ var Client = (function(window) {
         // Join game
         socket.emit('join', gameID);
     };
+
+    var generateBoardCSS = function(board) {
+      // Dynamically create board because most of the rows and columns are the same
+
+      // Top row border
+      var topRow = "";
+      topRow += "<tr>";
+      topRow += "<td class='top-left-corner'></td>";
+      for (var col = 1; col <= 5; col++) {
+        topRow += "<td class='top-edge'></td>";
+      }
+      topRow += "<td class='top-right-corner'></td>";
+      topRow += "</tr>";
+      board.append(topRow);
+
+      // Create a new row to display pieces
+      for (var row = 1; row <= 12; row++) {
+        var curRow = "";
+        curRow += "<tr>";
+        curRow += "<td class='left-edge'></td>";
+        for (var col = 1; col <= 5; col++) {
+          curRow += "<td class='square'></td>";
+        }
+        curRow += "<td class='right-edge'></td>";
+        curRow += "</tr>";
+        board.append(curRow);
+      }
+
+      // Bottom row border
+      var bottomRow = "<tr>";
+      bottomRow += "<td class='bottom-left-corner'></td>";
+      for (var col = 1; col <= 5; col++) {
+        bottomRow += "<td class='bottom-edge'></td>";
+      }
+      bottomRow += "<td class='bottom-right-corner'></td>";
+      bottomRow += "</tr>";
+      board.append(bottomRow);
+    }
 
     /**
     * Assign square IDs and labels based on player's perspective
@@ -248,18 +252,20 @@ var Client = (function(window) {
 
     var generateMoveString = function(destinationSquare, symbol)
     {
-        var piece = selection.color+selection.piece;
-        var src   = $('#'+selection.file+selection.rank);
+        var piece = selection.pieceStr;
+        var src   = $('#'+selection.squareId);
         var dest  = $(destinationSquare);
 
         clearHighlights();
 
+        var pieceClass = getPieceClasses(piece);
+
         // Move piece on board
-        src.removeClass(getPieceClasses(piece)).addClass('empty');
-        dest.removeClass('empty').addClass(getPieceClasses(piece));
+        src.removeClass(pieceClass).addClass('empty');
+        dest.removeClass('empty').addClass(pieceClass);
 
         // Return move string
-        return selection.file + selection.rank + ' ' + symbol + ' ' + dest.attr('id');
+        return selection.squareId + ' ' + symbol + ' ' + dest.attr('id');
     }
 
     /**
@@ -288,10 +294,8 @@ var Client = (function(window) {
 
         // Set selection object
         selection = {
-            color: piece[0],
-            piece: piece[1],
-            file:  square.attr('id')[0],
-            rank:  square.attr('id').substr(1, square.attr('id').length - 1)
+            pieceStr: piece,
+            squareId:  square.attr('id'),
         };
 
         // Highlight the selected square
@@ -328,10 +332,8 @@ var Client = (function(window) {
 
         // Set selection object
         selection = {
-            color: piece[0],
-            piece: piece[1],
-            file:  square.attr('id')[0],
-            rank:  square.attr('id').substr(1, square.attr('id').length - 1)
+            pieceStr: piece,
+            squareId:  square.attr('id'),
         };
 
         // Highlight the selected square
@@ -452,7 +454,10 @@ var Client = (function(window) {
     // Update board
     for (var sq in gameState.board.boardState)
     {
-        $('#'+sq).removeClass(gameClasses).addClass(getPieceClasses(gameState.board.boardState[sq]));
+      var piece = gameState.board.boardState[sq];
+      var pieceStr = (piece == null) ? null : (piece.colorChar + piece.rankStr);
+      var pieceClass = getPieceClasses(pieceStr);
+      $('#'+sq).removeClass(gameClasses).addClass(pieceClass);
     }
 
     // Highlight last move
