@@ -35,4 +35,12 @@ describe('Board', function () {
     });
   });
 
+  describe('#evaluateMove()', function () {
+    it('Evaluate a move', function () {
+      var moveResult = board.evaluateMove('a6', 'a7')
+      assert.equal(moveResult.type, 'equal');
+      assert.equal(moveResult.startSquare, 'a6')
+      assert.equal(moveResult.endSquare, 'a7')
+    });
+  });
 });
