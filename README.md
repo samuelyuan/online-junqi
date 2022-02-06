@@ -24,6 +24,13 @@ npm install
 node server.js
 ```
 
+Unit Tests
+---
+
+```
+npm run test
+```
+
 Screenshots
 ---
 

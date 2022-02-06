@@ -44,7 +44,9 @@ var Client = (function(window) {
         gameOverMessage     = $('#game-over');
         forfeitPrompt       = $('#forfeit-game');
 
-        gameClasses = "red blue rank0 rank1 rank2 rank3 rank4 rank5 rank6 rank7 rank8 rank9 rank10 rank11 not-moved empty selected " +
+        var colorClasses = "red blue";
+        var rankClasses = "rank0 rank1 rank2 rank3 rank4 rank5 rank6 rank7 rank8 rank9 rank10 rank11";
+        gameClasses = colorClasses + " " + rankClasses + " not-moved empty selected " +
                       "valid-move valid-attack valid-swap last-move";
 
         // Create socket connection
@@ -172,34 +174,17 @@ var Client = (function(window) {
    */
   var attachDOMEventHandlers = function()
   {
-    // Highlight valid moves for red pieces
-    if (playerColor === 'red')
+    var baseString = '.' + playerColor + '.rank';
+    // All pieces can be swapped
+    for (var i = 0; i <= 11; i++)
     {
-        var baseString = '.red.rank';
-        for (var i = 0; i <= 11; i++)
-        {
-            container.on('click', baseString + i.toString(), callbackHighlightSwap('r', i.toString()));
-        }
-
-        for (var i = 0; i < 10; i++)
-        {
-            container.on('click', baseString + i.toString(), callbackHighlightMoves('r', i.toString()));
-        }
+      container.on('click', baseString + i.toString(), callbackHighlightSwap(playerColor[0], i.toString()));
     }
 
-    // Highlight valid moves for blue pieces
-    if (playerColor === 'blue')
+    // Only highlight movable pieces
+    for (var i = 0; i < 10; i++)
     {
-        var baseString = '.blue.rank';
-        for (var i = 0; i <= 11; i++)
-        {
-            container.on('click', baseString + i.toString(), callbackHighlightSwap('b', i.toString()));
-        }
-
-        for (var i = 0; i < 10; i++)
-        {
-            container.on('click', baseString + i.toString(), callbackHighlightMoves('b', i.toString()));
-        }
+      container.on('click', baseString + i.toString(), callbackHighlightMoves(playerColor[0], i.toString()));
     }
 
     // Clear all move highlights
@@ -555,8 +540,8 @@ var Client = (function(window) {
       }
 
       var pieceColor = piece[0];
-      var className = '';
       var pieceRank = getPieceRank(piece);
+      var colorNameMap = {'r': 'red', 'b': 'blue'}
 
       //Don't reveal any of your opponent's pieces (the only exception is the flag which can be revealed after the commander dies)
       if (playerColor[0] !== pieceColor)
@@ -569,45 +554,14 @@ var Client = (function(window) {
 
           //Display flag when commander dies
           if (shouldRevealOpponentFlag(pieceColor, pieceRank, playerColor)) {
-            //Determine the opponent's color (if you're blue, the opponent must be red)
-            if (playerColor[0] === 'r')
-            {
-                return 'blue rank11';
-            }
-            else if (playerColor[0] === 'b')
-            {
-                return 'red rank11';
-            }
+            return colorNameMap[pieceColor] + ' rank11';
           }
 
           //Never display any other piece's rank
-          if (playerColor[0] !== 'b')
-          {
-              return 'facedown blue';
-          }
-          else if (playerColor[0] !== 'r')
-          {
-              return 'facedown red';
-          }
+          return 'facedown ' + colorNameMap[pieceColor];
       }
 
-      if (pieceColor === 'b')
-      {
-          className += 'blue ';
-      }
-      else if (pieceColor === 'r')
-      {
-          className += 'red ';
-      }
-
-      className += 'rank' + pieceRank;
-
-      if (piece[piece.length - 1] === '_')
-      {
-         className += ' not-moved';
-      }
-
-      return className;
+      return colorNameMap[pieceColor] + ' rank' + pieceRank;
   };
 
   // currentPieceColor is "r" or "b"
@@ -618,22 +572,15 @@ var Client = (function(window) {
       return false;
     }
 
-    // Find the owner of that piece
-    var indexOwner = -1;
-    for (var i = 0; i < gameState.players.length; i++) {
-      if (gameState.players[i].color[0] === currentPieceColor) {
-        indexOwner = i;
-        break;
-      }
-    }
-
     // The piece doesn't have an owner
     // Should not reach this point
-    if (indexOwner == -1) {
+    if (!(currentPieceColor in gameState.colorMap)) {
       return false;
     }
 
+    // Find the owner of that piece
     // The other player is not finished seting up the game
+    var indexOwner = gameState.colorMap[currentPieceColor];
     return gameState.players[indexOwner].isSetup === false
   }
 
@@ -652,20 +599,13 @@ var Client = (function(window) {
       return false;
     }
 
-    // Find the owner of that piece
-    var indexOwner = -1;
-    for (var i = 0; i < gameState.players.length; i++) {
-      if (gameState.players[i].color[0] === currentPieceColor) {
-        indexOwner = i;
-        break;
-      }
-    }
-
-    if (indexOwner == -1) {
+    if (!(currentPieceColor in gameState.colorMap)) {
       return false;
     }
 
+    // Find the owner of that piece
     // Reveal the flag if that player lost its commander.
+    var indexOwner = gameState.colorMap[currentPieceColor];
     return gameState.players[indexOwner].hasCommander === false;
   }
 
