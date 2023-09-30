@@ -24,6 +24,8 @@ npm install
 node server.js
 ```
 
+4. Visit localhost:3000 to view the page.
+
 Unit Tests
 ---
 

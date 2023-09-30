@@ -1,19 +1,25 @@
-var path         = require('path')
-  , http         = require('http')
-  , express      = require('express')
-  , socket       = require('socket.io')
-  , httpRoutes   = require('./routes/http')
-  , socketRoutes = require('./routes/socket')
-  , GameStore    = require('./lib/GameStore');
+var bodyParser   = require('body-parser'),
+    cookie       = require('cookie'),
+    errorHandler = require('errorhandler'),
+    express      = require('express'),
+    session      = require('express-session'),
+    http         = require('http'),
+    logger       = require('morgan'),
+    methodOverride = require('method-override'),
+    multer       = require('multer'),
+    path         = require('path'),
+    favicon      = require('serve-favicon');
 
-var app    = express()
-  , server = http.createServer(app)
-  , io     = socket.listen(server);
+var httpRoutes   = require('./routes/http'),
+    socketRoutes = require('./routes/socket'),
+    GameStore    = require('./lib/GameStore');
 
+var app = express();
+var server = http.createServer(app);
+var io     = require('socket.io')(server);
 var DB = new GameStore();
 
-var cookieParser = express.cookieParser('I wish you were an oatmeal cookie')
-  , sessionStore = new express.session.MemoryStore();
+var sessionStore = new session.MemoryStore();
 
 // Settings
 app.set('port', process.env.PORT || 3000);
@@ -21,39 +27,46 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 // Middleware
-app.use(express.favicon(__dirname + '/public/img/favicon.ico'));
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(cookieParser);
-app.use(express.session({ store: sessionStore }));
+app.use(favicon(__dirname + '/public/img/favicon.ico'));
+app.use(logger('dev'));
+app.use(methodOverride());
+app.use(session({
+  resave: true,
+  saveUninitialized: true,
+  secret: 'mySecret',
+  store: sessionStore
+}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(app.router);
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+  app.use(errorHandler());
 }
 
 /*
  * Only allow socket connections that come from clients with an established session.
- * This requires re-purposing Express's cookieParser middleware in order to expose
- * the session info to Socket.IO
  */
-io.set('authorization', function (handshakeData, callback) {
-  cookieParser(handshakeData, {}, function(err) {
-    if (err) return callback(err);
-    sessionStore.load(handshakeData.signedCookies['connect.sid'], function(err, session) {
-      if (err) return callback(err);
-      handshakeData.session = session;
-      var authorized = (handshakeData.session) ? true : false;
-      callback(null, authorized);
-    });
+io.use(function(socket, next) {
+  var cookies = cookie.parse(socket.handshake.headers.cookie);
+  // connect.sid comes with extra information
+  var sessionId = cookies['connect.sid'].split('.')[0].split(':')[1];
+
+  sessionStore.load(sessionId, function(err, session) {
+    if (err) {
+      return next(err);
+    }
+    socket.handshake.session = session;
+    var authorized = (socket.handshake.session) ? true : false;
+    next(null, authorized);
   });
 });
+
 
 // Attach routes
 httpRoutes.attach(app, DB);
 socketRoutes.attach(io, DB);
 
 // And away we go
-server.listen(app.get('port'), function(){
-    console.log('Online Junqi is listening on port ' + app.get('port'));
+server.listen(app.get('port'), () => {
+  console.log('Online Junqi is listening on port ' + app.get('port'));
 });
