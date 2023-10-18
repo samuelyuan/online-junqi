@@ -1,5 +1,6 @@
-var assert = require('assert');
-var RailroadNetwork = require('../lib/RailroadNetwork');
+import { strict as assert } from 'assert';
+import { Piece } from '../src/lib/Piece';
+import { RailroadNetwork } from '../src/lib/RailroadNetwork';
 
 describe('Graph', function () {
   const RAIL1 = ['a2', 'a3', 'a4', 'a5', 'a6'];
@@ -9,8 +10,8 @@ describe('Graph', function () {
   describe('#getReachableSquaresEngineer()', function () {
     it('Get reachable squares', function () {
       var currentSquare = "e2"
-      var boardState = {"e2": "r9", "d2": null, "c2": null, "b2": null,
-       "a2": null, "a3": null, "a4": null, "a5": "_", "a6": null};
+      var boardState = {"e2": new Piece("r", "9"), "d2": null, "c2": null, "b2": null,
+       "a2": null, "a3": null, "a4": null, "a5": new Piece("_", "_"), "a6": null};
       var isPieceEngineer = true;
 
       var reachableSquares = railroadNetwork.getReachableSquares(currentSquare, isPieceEngineer, boardState);
@@ -29,8 +30,8 @@ describe('Graph', function () {
   describe('#getReachableSquaresNotEngineer()', function () {
     it('Get reachable squares', function () {
       var currentSquare = "e2"
-      var boardState = {"e2": "r9", "d2": null, "c2": null, "b2": null,
-       "a2": null, "a3": null, "a4": null, "a5": "_", "a6": null};
+      var boardState = {"e2": new Piece("r", "9"), "d2": null, "c2": null, "b2": null,
+       "a2": null, "a3": null, "a4": null, "a5": new Piece("_", "_"), "a6": null};
       var isPieceEngineer = false;
 
       var reachableSquares = railroadNetwork.getReachableSquares(currentSquare, isPieceEngineer, boardState);
@@ -75,3 +76,5 @@ describe('Graph', function () {
     });
   });
 });
+
+export {};

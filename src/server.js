@@ -23,11 +23,11 @@ var sessionStore = new session.MemoryStore();
 
 // Settings
 app.set('port', process.env.PORT || 3000);
-app.set('views', __dirname + '/views');
+app.set('views', path.join(__dirname, '..', 'views'));
 app.set('view engine', 'ejs');
 
 // Middleware
-app.use(favicon(__dirname + '/public/img/favicon.ico'));
+app.use(favicon(path.join(__dirname, '..', 'public/img/favicon.ico')));
 app.use(logger('dev'));
 app.use(methodOverride());
 app.use(session({
@@ -38,7 +38,7 @@ app.use(session({
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 if ('development' == app.get('env')) {
   app.use(errorHandler());
 }

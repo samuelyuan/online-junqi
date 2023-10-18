@@ -1,5 +1,5 @@
-var assert = require('assert');
-var Piece = require('../lib/Piece');
+import { strict as assert } from 'assert';
+import { Piece } from '../src/lib/Piece';
 
 const COMPARE_RANK1_LOSE = -1;
 const COMPARE_DRAW = 0;

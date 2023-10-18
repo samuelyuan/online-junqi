@@ -21,12 +21,17 @@ cd online-junqi
 npm install
 ```
 
-3. Run nodejs
+3. Compile Typescript
 ```
-node server.js
+npm run tsc
 ```
 
-4. Visit localhost:3000 to view the page.
+4. Run nodejs
+```
+npm run start
+```
+
+5. Visit localhost:3000 to view the page.
 
 Unit Tests
 ---
@@ -40,13 +45,13 @@ How it Works
 
 The variant of the Junqi game is 1v1 and the two player's front rows are directly connected. There are no intermediate railroads that would exist if the game were to be 2v2. Each player's starting locations have 6 rows and 5 columns, which would generate 30 locations, but 5 of the locations are reserved for bunkers and the remaining 25 are the player's pieces.
 
-If we combine both players locations, the board consists of 12 rows by 5 columns. The board state is defined as a map, where the key is the board position, e.g. "a1", and the value denotes the piece, e.g. r10. The board position has the column at the beginning (a, b, c, d, e) and the row number at the end from 1-12. The board piece has the color at the beginning ('r' for red, 'b' for blue) and a rank after (0-11). Generally the lower the rank, the more powerful the piece. Bombs (炸弹) have rank 0, field marshal (司令) has rank 1. The lowest rank 11 is for the flag (军旗). 
+If we combine both players locations, the board consists of 12 rows by 5 columns. The board state is defined as a map, where the key is the board position, e.g. "a1", and the value denotes the piece, e.g. r10. The board position has the column at the beginning (a, b, c, d, e) and the row number at the end from 1-12. The board piece has the color at the beginning ('r' for red, 'b' for blue) and a rank after (0-11). Generally the lower the rank, the more powerful the piece. Bombs (炸弹) have rank 0, field marshal (司令) has rank 1. The lowest rank 11 is for the flag (军旗).
 
 The Board class is responsible for storing the board state, comparing the rankings between pieces, and setting special rules for some of the board locations, such as valid flag locations, valid landmine rows, valid bomb rows etc. The player isn't allowed to setup the pieces
 
 The Graph class is responsible for defining the adjacency graph for the nodes on the board. Each node is a board location and an edge will be added between two nodes if they are directly adjacent.
 
-The RailroadNetwork class is responsible for doing BFS search and allowing units to move across multiple locations, since the units are using the railroad to transport themselves. If the piece isn't on a railroad, the adjacent neighbors are the same as the neighbors in the graph. If the piece is on a railroad, the adjacent neighbors would be all the pieces on the same railroad line and any adjacent neighbors which are one move away without the railroad. Engineers (工兵) are given an exception where they can turn corners and access any location on other railroad lines. The BFS search works by using the current unit's position as the starting point and checking whether each adjacent neighbor is on the railroad and only adds adjacent railroad nodes to the list of reachable nodes. 
+The RailroadNetwork class is responsible for doing BFS search and allowing units to move across multiple locations, since the units are using the railroad to transport themselves. If the piece isn't on a railroad, the adjacent neighbors are the same as the neighbors in the graph. If the piece is on a railroad, the adjacent neighbors would be all the pieces on the same railroad line and any adjacent neighbors which are one move away without the railroad. Engineers (工兵) are given an exception where they can turn corners and access any location on other railroad lines. The BFS search works by using the current unit's position as the starting point and checking whether each adjacent neighbor is on the railroad and only adds adjacent railroad nodes to the list of reachable nodes.
 
 Screenshots
 ---

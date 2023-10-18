@@ -1,5 +1,5 @@
-var assert = require('assert');
-var Board = require('../lib/Board');
+import { strict as assert } from 'assert';
+import Board = require("../dist/lib/Board");
 
 describe('Board', function () {
   // Assumes board is filled using starting configuration
@@ -38,6 +38,8 @@ describe('Board', function () {
   describe('#evaluateMove()', function () {
     it('Evaluate a move', function () {
       var moveResult = board.evaluateMove('a6', 'a7')
+
+      assert(moveResult != null)
       assert.equal(moveResult.type, 'equal');
       assert.equal(moveResult.startSquare, 'a6')
       assert.equal(moveResult.endSquare, 'a7')

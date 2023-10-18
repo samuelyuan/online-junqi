@@ -1,5 +1,5 @@
-var assert = require('assert');
-var Graph = require('../lib/Graph');
+import { strict as assert } from 'assert';
+import { Graph } from '../src/lib/Graph';
 
 describe('Graph', function () {
   var graph = new Graph();

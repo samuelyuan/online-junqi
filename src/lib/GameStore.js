@@ -48,17 +48,14 @@ GameStore.prototype.find = function(key) {
 GameStore.prototype.list = function()
 {
     var listIDs = [];
-    for (key in this.games)
-    {
+    Object.keys(this.games).forEach(key => {
         //if the room is empty, then remove it from the list
-        if (this.games[key].players[0].joined === false && this.games[key].players[1].joined === false)
-        {
+        if (this.games[key].players[0].joined === false && this.games[key].players[1].joined === false) {
             delete this.games[key];
-            continue;
+            return;
         }
-        
         listIDs.push(key);
-    }
+    });
     console.log(listIDs);
     return listIDs;
 };
