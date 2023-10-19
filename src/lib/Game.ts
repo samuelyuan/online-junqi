@@ -163,6 +163,50 @@ export class Game {
     return true;
   }
 
+  evaluateMoveAndModifyBoard(validMove: PlayerMove): boolean {
+    // Evaluation is only required for attacks
+    // since each unit's rank is hidden from the other player
+    var evaluatedMove = validMove;
+    if (validMove.type === "attack") {
+      var updatedEvaluatedMove = this.board.evaluateMove(validMove.startSquare, validMove.endSquare);
+      if (!updatedEvaluatedMove) {
+        return false;
+      }
+      evaluatedMove = updatedEvaluatedMove;
+    }
+
+    // Apply move
+    var selectedPiece: Piece = this.board.getPieceAtSquare(evaluatedMove.startSquare)!;
+    switch (evaluatedMove.type) {
+        case 'move':
+            this.board.placePieceAtSquare(evaluatedMove.endSquare, selectedPiece);
+            this.board.setSquareEmpty(evaluatedMove.startSquare);
+            break;
+
+        case 'capture':
+            this.capturedPieces.push(this.board.getPieceAtSquare(evaluatedMove.endSquare)!);
+            this.board.setSquareEmpty(evaluatedMove.endSquare);
+
+            this.board.placePieceAtSquare(evaluatedMove.endSquare, selectedPiece);
+            this.board.setSquareEmpty(evaluatedMove.startSquare);
+            break;
+
+        case 'dies':
+            this.board.setSquareEmpty(evaluatedMove.startSquare);
+            break;
+
+        case 'equal':
+            this.capturedPieces.push(this.board.getPieceAtSquare(evaluatedMove.endSquare)!);
+            this.board.setSquareEmpty(evaluatedMove.startSquare);
+            this.board.setSquareEmpty(evaluatedMove.endSquare);
+            break;
+
+        default : break;
+    };
+
+    return true;
+  }
+
   /**
    * Apply move and regenerate game state.
    * Returns true on success and false on failure.
@@ -177,49 +221,14 @@ export class Game {
 
       // Test if move is valid
       var validMove = _.findWhere(this.validMoves, this.parseMoveString(moveString));
-
       if (!validMove) {
           return false;
       }
 
-      // Evaluation is only required for attacks
-      // since each unit's rank is hidden from the other player
-      var evaluatedMove = validMove;
-      if (validMove.type === "attack") {
-        evaluatedMove = this.board.evaluateMove(validMove.startSquare, validMove.endSquare);
-        if (!evaluatedMove) {
-          return false;
-        }
+      var moveMade = this.evaluateMoveAndModifyBoard(validMove!);
+      if (!moveMade) {
+        return false;
       }
-
-      // Apply move
-      var selectedPiece: Piece = this.board.getPieceAtSquare(evaluatedMove.startSquare)!;
-      switch (evaluatedMove.type) {
-          case 'move':
-              this.board.placePieceAtSquare(evaluatedMove.endSquare, selectedPiece);
-              this.board.setSquareEmpty(evaluatedMove.startSquare);
-              break;
-
-          case 'capture':
-              this.capturedPieces.push(this.board.getPieceAtSquare(evaluatedMove.endSquare)!);
-              this.board.setSquareEmpty(evaluatedMove.endSquare);
-
-              this.board.placePieceAtSquare(evaluatedMove.endSquare, selectedPiece);
-              this.board.setSquareEmpty(evaluatedMove.startSquare);
-              break;
-
-          case 'dies':
-              this.board.setSquareEmpty(evaluatedMove.startSquare);
-              break;
-
-          case 'equal':
-              this.capturedPieces.push(this.board.getPieceAtSquare(evaluatedMove.endSquare)!);
-              this.board.setSquareEmpty(evaluatedMove.startSquare);
-              this.board.setSquareEmpty(evaluatedMove.endSquare);
-              break;
-
-          default : break;
-      };
 
       // Set this move as last move
       this.lastMove = validMove;

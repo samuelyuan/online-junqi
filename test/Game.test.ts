@@ -160,6 +160,31 @@ describe('Game', function () {
     })
   });
 
+  describe('#move()', function () {
+    var gameRedSide = new Game({
+      playerName: '',
+      playerColor: 'red'
+    });
+    var redPlayerSession = {
+      playerName: '',
+      playerColor: 'red',
+    };
+    var bluePlayerSession = {
+      playerName: '',
+      playerColor: 'blue',
+    }
+    gameRedSide.addPlayer(redPlayerSession);
+    gameRedSide.addPlayer(bluePlayerSession);
+    gameRedSide.finishSetup(redPlayerSession);
+    gameRedSide.finishSetup(bluePlayerSession);
+
+    it('Red player moves', function() {
+      var status = gameRedSide.move("a6 x a7");
+      assert.equal(status, true);
+      assert.equal(gameRedSide.validSwap.length, 0);
+    });
+  });
+
   describe('#forfeit()', function () {
     var gameRedSide = new Game({
       playerName: '',
