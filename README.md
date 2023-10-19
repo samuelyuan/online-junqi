@@ -10,6 +10,11 @@ The objective of the game is to capture your opponent's flag. Whoever captures t
 
 For a more detailed version of the game's rules, you can refer to [this page](https://en.wikipedia.org/wiki/Luzhanqi).
 
+<div style="display:inline-block;">
+<img src="https://github.com/samuelyuan/online-junqi/raw/master/images/menu.png" alt="Menu" width="400px" height="200px" />
+<img src="https://github.com/samuelyuan/online-junqi/raw/master/images/game.png" alt="Gane" width="400px" height="200px" />
+</div>
+
 Getting Started
 ---
 
@@ -59,17 +64,7 @@ The Graph class is responsible for defining the adjacency graph for the nodes on
 
 The RailroadNetwork class is responsible for doing BFS search and allowing units to move across multiple locations, since the units are using the railroad to transport themselves. If the piece isn't on a railroad, the adjacent neighbors are the same as the neighbors in the graph. If the piece is on a railroad, the adjacent neighbors would be all the pieces on the same railroad line and any adjacent neighbors which are one move away without the railroad. Engineers (工兵) are given an exception where they can turn corners and access any location on other railroad lines. The BFS search works by using the current unit's position as the starting point and checking whether each adjacent neighbor is on the railroad and only adds adjacent railroad nodes to the list of reachable nodes.
 
-Screenshots
+Reference
 ---
-
-<img src="https://github.com/samuelyuan/online-junqi/raw/master/images/menu.png" alt="Menu" width="400px" height="200px" />
-<img src="https://github.com/samuelyuan/online-junqi/raw/master/images/game.png" alt="Gane" width="400px" height="200px" />
-
-Credits
----
-
-While writing the code, I looked at an existing online multiplayer nodejs app on Github called the
-Socket.io Chess project. Though I have had to modify a lot of the code, it served as a good framework for learning
-and experimenting.
 
 https://github.com/thebinarypenguin/socket.io-chess

@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-var Game = require('../src/lib/Game');
+import { Game } from '../src/lib/Game';
 
 describe('Game', function () {
   describe('#parseMoveString()', function () {
@@ -14,7 +14,7 @@ describe('Game', function () {
 
     it('Convert move string into object', function () {
       var playerMove = gameRedSide.parseMoveString("a1 - b1");
-      assert.notEqual(playerMove, null);
+      assert.ok(playerMove !== null);
       assert.equal(playerMove.type, "move");
       assert.equal(playerMove.startSquare, "a1");
       assert.equal(playerMove.endSquare, "b1");
@@ -22,7 +22,7 @@ describe('Game', function () {
 
     it('Convert attack string into object', function () {
       var playerAttack = gameRedSide.parseMoveString("a1 x b1");
-      assert.notEqual(playerAttack, null);
+      assert.ok(playerAttack !== null);
       assert.equal(playerAttack.type, "attack");
       assert.equal(playerAttack.startSquare, "a1");
       assert.equal(playerAttack.endSquare, "b1");
@@ -30,7 +30,7 @@ describe('Game', function () {
 
     it('Convert swap string into object', function () {
       var playerSwap = gameRedSide.parseMoveString("a1 s b1");
-      assert.notEqual(playerSwap, null);
+      assert.ok(playerSwap !== null);
       assert.equal(playerSwap.type, "swap");
       assert.equal(playerSwap.startSquare, "a1");
       assert.equal(playerSwap.endSquare, "b1");

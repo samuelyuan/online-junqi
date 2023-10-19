@@ -10,7 +10,7 @@ const STATUS_PENDING = "pending";
 const STATUS_ONGOING = "ongoing";
 const STATUS_FORFEIT = "forfeit";
 
-interface PlayerSession {
+export interface PlayerSession {
   playerColor: string;
   playerName: string;
 }
@@ -26,7 +26,7 @@ interface PlayerStatus {
   forfeited: boolean;
 }
 
-class Game {
+export class Game {
   status: string;
   activePlayer: PlayerStatus | null;
   players: PlayerStatus[];
@@ -322,6 +322,3 @@ class Game {
       }
   };
 }
-
-// Export the game object
-module.exports = Game;
