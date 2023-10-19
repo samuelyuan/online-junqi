@@ -23,7 +23,7 @@ npm install
 
 3. Compile Typescript
 ```
-npm run tsc
+npm run build
 ```
 
 4. Run nodejs
@@ -36,8 +36,14 @@ npm run start
 Unit Tests
 ---
 
+Run unit tests
 ```
 npm run test
+```
+
+Run unit tests with coverage. Results will be generated in coverage folder.
+```
+npm run test:coverage
 ```
 
 How it Works

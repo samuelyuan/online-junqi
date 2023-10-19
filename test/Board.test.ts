@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import Board = require("../dist/lib/Board");
+import { Board } from '../src/lib/Board';
 
 describe('Board', function () {
   // Assumes board is filled using starting configuration

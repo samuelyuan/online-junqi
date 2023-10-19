@@ -38,7 +38,7 @@ export class Piece {
     const rank1 = this.rankStr;
     const rank2 = otherPiece.rankStr;
 
-    // the opponent is a bomb, which destorys any piece that hits it
+    // the opponent is a bomb, which destroys any piece that hits it
     if (rank1 == RANK_BOMB || rank2 == RANK_BOMB) {
       return COMPARE_DRAW;
     }
@@ -50,7 +50,7 @@ export class Piece {
 
     // the opponent is a landmine, which only the engineer can disable
     if (rank2 == RANK_LANDMINE) {
-      //engineer disables landmine
+      // engineer disables landmine
       if (rank1 == RANK_ENGINEER) {
         return COMPARE_RANK1_WIN;
       } else {

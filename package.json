@@ -6,7 +6,26 @@
     "start": "node ./dist/server.js",
     "build": "tsc",
     "postinstall": "npm run tsc",
-    "test": "mocha --require ts-node/register test/**/*.test.ts"
+    "test": "mocha --require ts-node/register test/**/*.test.ts",
+    "test:coverage": "nyc npm run test"
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "check-coverage": true,
+    "all": true,
+    "include": [
+        "src/**/!(*.test.*).[tj]s?(x)"
+    ],
+    "exclude": [
+        "src/_tests_/**/*.*"
+    ],
+    "reporter": [
+        "html",
+        "lcov",
+        "text",
+        "text-summary"
+    ],
+    "report-dir": "coverage"
   },
   "dependencies": {
     "@types/mocha": "^10.0.2",
@@ -27,11 +46,13 @@
     "underscore": "^1.13.6"
   },
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@types/express": "^4.17.19",
     "@types/jest": "^29.5.5",
     "@types/node": "^20.8.6",
     "@types/socket.io": "^3.0.2",
     "@typescript-eslint/parser": "^6.8.0",
+    "nyc": "^15.1.0",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.2.2"

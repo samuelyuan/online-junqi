@@ -33,19 +33,19 @@ const RANK_ENGINEER: string = "9";
 const RANK_LANDMINE: string = "10";
 const RANK_FLAG: string = "11";
 
-interface PlayerMove {
+export interface PlayerMove {
   type: string;
   startSquare: string;
   endSquare: string;
 }
 
-interface SwapMove {
+export interface SwapMove {
   type: string;
   startSquare: string;
   endSquare: string;
 }
 
-class Board {
+export class Board {
   boardState: { [key: string]: Piece | null };
   nodeKeys: string[];
   railroadNetwork: RailroadNetwork;
@@ -271,6 +271,3 @@ var isValidFlagPosition = function(current: string, destination: string) {
   var isPlayer2Headquarters = HEADQUARTER_SQUARES[1].includes(current) && HEADQUARTER_SQUARES[1].includes(destination) && current != destination;
   return isPlayer1Headquarters || isPlayer2Headquarters;
 }
-
-// Export the board object
-module.exports = Board;

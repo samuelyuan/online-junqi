@@ -19,7 +19,7 @@ export class RailroadNetwork {
       return this.graph.getAdjacentNeighbors(currentSquare);
     }
 
-    var singleRail = this.getAllRailroadsFromSquare(currentSquare);
+    const singleRail: Set<string> = this.getAllRailroadsFromSquare(currentSquare);
 
     // BFS search on the railroads
     var reachableSquares: string[] = [];
@@ -30,27 +30,28 @@ export class RailroadNetwork {
 
     while (reachableSquares.length != 0) {
       var iterSquare: string = reachableSquares.shift()!;
-      var allNeighbors: Set<string> = this.graph.getAdjacentNeighbors(iterSquare);
-      var neighborsOnRailroad = Array.from(allNeighbors).filter((nextSquare) => this.isOnRail(nextSquare));
+      const allNeighbors: Set<string> = this.graph.getAdjacentNeighbors(iterSquare);
+      const neighborsOnRailroad: string[] = Array.from(allNeighbors).filter((nextSquare) => this.isOnRail(nextSquare));
 
       neighborsOnRailroad.forEach(function(nextSquare) {
         if (visited.has(nextSquare)) {
           return;
         }
-          // if the piece is not an engineer, check if it is on the same railroad
-          if (isPieceEngineer === false && singleRail.has(nextSquare) === false) {
-            // skip if not accessible without turning
-            return;
-          }
 
-          // visited
-          visited.add(nextSquare);
+        // if the piece is not an engineer, check if it is on the same railroad
+        if (isPieceEngineer === false && singleRail.has(nextSquare) === false) {
+          // skip if not accessible without turning
+          return;
+        }
 
-          // empty
-          if (boardState[nextSquare] === null) {
-            // explore this square and its neighbors
-            reachableSquares.push(nextSquare);
-          }
+        // visited
+        visited.add(nextSquare);
+
+        // empty
+        if (boardState[nextSquare] === null) {
+          // explore this square and its neighbors
+          reachableSquares.push(nextSquare);
+        }
       });
     }
 
@@ -69,7 +70,7 @@ export class RailroadNetwork {
 
   getAllRailroadsFromSquare(currentSquare: string): Set<string> {
     // get all positions that are accessible on the same railroad
-    var singleRail = this.railLines
+    var singleRail: string[] = this.railLines
       .filter((railroad) => railroad.includes(currentSquare))
       .flat();
     return new Set(singleRail);

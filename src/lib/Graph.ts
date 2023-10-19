@@ -99,7 +99,7 @@ export class Graph {
         .filter((newSquare): newSquare is string => !!newSquare);
   }
 
-  addEdgesInFrontRowSamePlayer(neighborMap: { [key: string]: Set<string> }) {
+  addEdgesInFrontRowSamePlayer(neighborMap: { [key: string]: Set<string> }): void {
     // Player 1: a6 <-> b6 <-> c6 <-> d6 <-> e6
     this.addEdge(neighborMap, "b6", "a6");
     this.addEdge(neighborMap, "b6", "c6");
@@ -112,7 +112,7 @@ export class Graph {
     this.addEdge(neighborMap, "d7", "e7");
   }
 
-  addEdgesBetweenDifferentPlayers(neighborMap: { [key: string]: Set<string> }) {
+  addEdgesBetweenDifferentPlayers(neighborMap: { [key: string]: Set<string> }): void {
     // Add edges between front row nodes on the opposite side
     this.addEdge(neighborMap, "a6", "a7");
     this.addEdge(neighborMap, "c6", "c7");
@@ -141,7 +141,7 @@ export class Graph {
   };
 
   // Add an unconnected edge between node1 and node2
-  addEdge(neighborMap: { [key: string]: Set<string> }, node1Key: string, node2Key: string) {
+  addEdge(neighborMap: { [key: string]: Set<string> }, node1Key: string, node2Key: string): void {
     // Initialize an empty list for the new nodes
     if (!(node1Key in neighborMap)) {
       neighborMap[node1Key] = new Set<string>();
@@ -167,10 +167,8 @@ var alpha2num = function(a: string) {
   }
 };
 
-var num2alpha = function(n: number)
-{
-    switch (n)
-    {
+var num2alpha = function(n: number) {
+    switch (n) {
        case 1: return 'a';
        case 2: return 'b';
        case 3: return 'c';
