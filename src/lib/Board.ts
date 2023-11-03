@@ -1,4 +1,11 @@
-import { Piece } from './Piece';
+import {
+  Piece,
+  RANK_BOMB,
+  RANK_COMMANDER,
+  RANK_ENGINEER,
+  RANK_LANDMINE,
+  RANK_FLAG,
+} from './Piece';
 import { RailroadNetwork } from './RailroadNetwork';
 
 const PLAYER1_LEFT_RAIL: string[] = ['a2', 'a3', 'a4', 'a5', 'a6'];
@@ -26,12 +33,6 @@ const RAIL_LINES: string[][] = [
 
 const BUNKER_SQUARES: string[] = ['b3', 'd3', 'c4', 'b5', 'd5', 'b8', 'd8', 'c9', 'b10', 'd10'];
 const HEADQUARTER_SQUARES: string[][] = [['b1', 'd1'], ['b12', 'd12']];
-
-const RANK_BOMB: string = "0";
-const RANK_COMMANDER: string = "1";
-const RANK_ENGINEER: string = "9";
-const RANK_LANDMINE: string = "10";
-const RANK_FLAG: string = "11";
 
 export interface PlayerMove {
   type: string;

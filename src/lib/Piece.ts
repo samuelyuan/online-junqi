@@ -1,12 +1,12 @@
-const RANK_BOMB = "0";
-const RANK_COMMANDER = "1";
-const RANK_ENGINEER = "9";
-const RANK_LANDMINE = "10";
-const RANK_FLAG = "11";
+export const RANK_BOMB: string = "0";
+export const RANK_COMMANDER: string = "1";
+export const RANK_ENGINEER: string = "9";
+export const RANK_LANDMINE: string = "10";
+export const RANK_FLAG: string = "11";
 
-const COMPARE_RANK1_LOSE = -1;
-const COMPARE_DRAW = 0;
-const COMPARE_RANK1_WIN = 1;
+const COMPARE_RANK1_LOSE: number = -1;
+const COMPARE_DRAW: number = 0;
+const COMPARE_RANK1_WIN: number = 1;
 
 export class Piece {
   colorChar: string;
