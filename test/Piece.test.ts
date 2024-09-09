@@ -32,6 +32,16 @@ describe('Piece', function () {
     });
   });
 
+  describe('#regularUnitAttacksLandmine()', function () {
+    it('Unit disappears', function () {
+      var engineerPiece = new Piece('r', '1');
+      var landminePiece = new Piece('b', '10');
+
+      var result = engineerPiece.compareRank(landminePiece);
+      assert.equal(result, COMPARE_RANK1_LOSE);
+    });
+  });
+
   describe('#weakerUnitAttacksStrongerUnit()', function () {
     it('Weaker unit loses', function () {
       var rank5Piece = new Piece('r', '5');
@@ -59,6 +69,16 @@ describe('Piece', function () {
 
       var result = rank2RedPiece.compareRank(rank2BluePiece);
       assert.equal(result, COMPARE_DRAW);
+    });
+  });
+
+  describe('#unitTakesFlag()', function () {
+    it('Unit always takes flag', function () {
+      var rank2RedPiece = new Piece('r', '2');
+      var flagPiece = new Piece('b', '11');
+
+      var result = rank2RedPiece.compareRank(flagPiece);
+      assert.equal(result, COMPARE_RANK1_WIN);
     });
   });
 });

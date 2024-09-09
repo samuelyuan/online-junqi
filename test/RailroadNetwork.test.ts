@@ -2,7 +2,7 @@ import { strict as assert } from 'assert';
 import { Piece } from '../src/lib/Piece';
 import { RailroadNetwork } from '../src/lib/RailroadNetwork';
 
-describe('Graph', function () {
+describe('RailroadNetwork', function () {
   const RAIL1 = ['a2', 'a3', 'a4', 'a5', 'a6'];
   const RAIL2 = ['a2', 'b2', 'c2', 'd2', 'e2'];
   var railroadNetwork = new RailroadNetwork([RAIL1, RAIL2]);

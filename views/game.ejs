@@ -68,12 +68,15 @@
         <script src="/js/jquery.min.js"></script>
         <script src="/js/bootstrap.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
-        <script src="/js/client.js"></script>
+        <script type="module" src="/js/lib/clientboard.js"></script>
+        <script type="module" src="/js/client.js"></script>
         <script src="/js/fastclick.js"></script>
-        <script>
+        <script type="module">
+            import Client from "/js/client.js";
+
             $(document).ready(function() {
                   FastClick.attach(document.body);
-                  window.Client({
+                  Client({
                     gameID      : '<%= gameID %>',
                     playerColor : '<%= playerColor %>',
                     playerName  : '<%= playerName %>'

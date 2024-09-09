@@ -15,16 +15,18 @@
     "check-coverage": true,
     "all": true,
     "include": [
-        "src/**/!(*.test.*).[tj]s?(x)"
+      "src/**/!(*.test.*).[tj]s?(x)",
+      "public/js/client.js",
+      "public/js/lib/**"
     ],
     "exclude": [
-        "src/_tests_/**/*.*"
+      "src/_tests_/**/*.*"
     ],
     "reporter": [
-        "html",
-        "lcov",
-        "text",
-        "text-summary"
+      "html",
+      "lcov",
+      "text",
+      "text-summary"
     ],
     "report-dir": "coverage"
   },

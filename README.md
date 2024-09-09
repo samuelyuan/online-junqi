@@ -2,8 +2,6 @@
 
 An open source Junqi app that can be played directly in your browser. This app was developed with Node.js and Websockets.
 
-http://junqi.herokuapp.com/
-
 You can create a new game or join an existing one. When you join a game, you are given the inital layout of pieces and you can setup your board. To swap pieces, you click on the first location you want to swap and click on the second location to confirm the swap. The game will enforce the rules and prevent you from doing an invalid swap like placing a flag outside of the headquarters.
 
 The objective of the game is to capture your opponent's flag. Whoever captures the opponent's flag first wins the game.
