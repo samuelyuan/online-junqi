@@ -98,7 +98,7 @@ describe('Game', function () {
       assert.equal(gameRedSide.players[0].joined, false);
     });
 
-    it('Unknown player leaves game', function() {
+    it('Unknown player leaves game', function () {
       // Unknown player
       var status = gameRedSide.addPlayer(unknownPlayerSession);
       assert.equal(status, false);
@@ -151,7 +151,7 @@ describe('Game', function () {
       assert.equal(gameRedSide.status, "ongoing");
     });
 
-    it('Unknown player finishes setup', function(){
+    it('Unknown player finishes setup', function () {
       var status = gameRedSide.finishSetup({
         playerName: '',
         playerColor: 'unknown'
@@ -178,7 +178,7 @@ describe('Game', function () {
     gameRedSide.finishSetup(redPlayerSession);
     gameRedSide.finishSetup(bluePlayerSession);
 
-    it('Red player moves', function() {
+    it('Red player moves', function () {
       var status = gameRedSide.move("a6 x a7");
       assert.equal(status, true);
       assert.equal(gameRedSide.validSwap.length, 0);
@@ -195,7 +195,7 @@ describe('Game', function () {
       playerColor: 'red',
     };
 
-    it('Red player forfeits game', function() {
+    it('Red player forfeits game', function () {
       assert.equal(gameRedSide.players[0].forfeited, false);
 
       var status = gameRedSide.forfeit(redPlayerSession);
@@ -203,7 +203,7 @@ describe('Game', function () {
       assert.equal(gameRedSide.players[0].forfeited, true);
     });
 
-    it('Unknown player forfeits game', function() {
+    it('Unknown player forfeits game', function () {
       var status = gameRedSide.forfeit({
         playerName: '',
         playerColor: 'unknown',

@@ -1,4 +1,5 @@
 import { strict as assert } from 'assert';
+import { BUNKER_SQUARES, HEADQUARTER_SQUARES } from '../src/lib/BoardConstants';
 import { Graph } from '../src/lib/Graph';
 
 describe('Graph', function () {
@@ -6,7 +7,7 @@ describe('Graph', function () {
 
   describe('#headquartersImmobile()', function () {
     it('headquarter nodes should have no neighbors', function () {
-      ["b1", "d1", "b12", "d12"].forEach(function(square) {
+      HEADQUARTER_SQUARES.forEach(function(square) {
         var neighbors = graph.getAdjacentNeighbors(square);
         assert.equal(neighbors.size, 0);
       });
@@ -24,7 +25,7 @@ describe('Graph', function () {
 
   describe('#bunkerNeighborSize()', function () {
     it('bunker nodes should have 8 neighbors', function () {
-      ['b3', 'd3', 'c4', 'b5', 'd5', 'b8', 'd8', 'c9', 'b10', 'd10'].forEach(function(square) {
+      BUNKER_SQUARES.forEach(function(square) {
         var neighbors = graph.getAdjacentNeighbors(square);
         assert.equal(neighbors.size, 8);
       });
@@ -64,6 +65,13 @@ describe('Graph', function () {
       assert.equal(neighbors.has("c6"), true);
       assert.equal(neighbors.has("a6"), true);
       assert.equal(neighbors.has("b5"), true);
+    });
+  });
+
+  describe('#transformSquareInvalid()', function () {
+    it("Transform invalid square", function () {
+      var result = graph.transformSquare("g10", {x:+0, y:+1});
+      assert.equal(result, null);
     });
   });
 });

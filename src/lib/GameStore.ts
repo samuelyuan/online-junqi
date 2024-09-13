@@ -1,6 +1,6 @@
 import { Game, PlayerSession } from './Game';
 
-class GameStore {
+export class GameStore {
   games: { [key: string]: Game };
   intervalId: ReturnType<typeof setInterval>;
 
@@ -19,9 +19,9 @@ class GameStore {
   }
 
   add(gameParams: PlayerSession) {
-    var key       = '';
+    var key = '';
     var keyLength = 7;
-    var chars     = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
     // Generate a key until we get a unique one
     do {
@@ -46,24 +46,24 @@ class GameStore {
   }
 
   find(key: string) {
-    return (this.games.hasOwnProperty(key)) ? this.games[key] : false ;
+    return (this.games.hasOwnProperty(key)) ? this.games[key] : false;
   }
 
   list() {
-      var listIDs: string[] = [];
-      Object.keys(this.games).forEach(key => {
-          //if the room is empty, then remove it from the list
-          if (
-            this.games[key].players[0].joined === false &&
-            this.games[key].players[1].joined === false
-          ) {
-              delete this.games[key];
-              return;
-          }
-          listIDs.push(key);
-      });
-      console.log(listIDs);
-      return listIDs;
+    var listIDs: string[] = [];
+    Object.keys(this.games).forEach(key => {
+      //if the room is empty, then remove it from the list
+      if (
+        this.games[key].players[0].joined === false &&
+        this.games[key].players[1].joined === false
+      ) {
+        delete this.games[key];
+        return;
+      }
+      listIDs.push(key);
+    });
+    console.log(listIDs);
+    return listIDs;
   };
 }
 

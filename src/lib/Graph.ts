@@ -1,15 +1,13 @@
 /*
 * Defines the adjacency graph for nodes on the board.
 */
+import { BUNKER_SQUARES, FRONT_ROW_SQUARES, HEADQUARTER_SQUARES } from './BoardConstants';
 
 interface TransformOffset {
   x: number;
   y: number;
 }
 
-const frontRowSquares: string[] = ['a6', 'b6', 'c6', 'd6', 'e6', 'a7', 'b7', 'c7', 'd7', 'e7'];
-const bunkerSquares: string[] = ['b3', 'd3', 'c4', 'b5', 'd5', 'b8', 'd8', 'c9', 'b10', 'd10'];
-const headquarterSquares: string[] = ['b1', 'd1', 'b12', 'd12'];
 // Bunker squares connect in 8 directions
 const bunkerTransforms: TransformOffset[] = [
   {x:+0, y:+1}, {x:+1, y:+1},
@@ -66,7 +64,7 @@ export class Graph {
 
     nodes.forEach(currentSquare => {
       // Exclude front row because the neighbor could end up in the opponent's side
-      if (frontRowSquares.includes(currentSquare)) {
+      if (FRONT_ROW_SQUARES.includes(currentSquare)) {
         return;
       }
       const adjacentSquares: string[] = this.getMoves(currentSquare, crossTransforms);
@@ -75,7 +73,7 @@ export class Graph {
       });
     });
 
-    bunkerSquares.forEach(currentSquare => {
+    BUNKER_SQUARES.forEach(currentSquare => {
       const adjacentSquares: string[] = this.getMoves(currentSquare, bunkerTransforms);
       adjacentSquares.forEach(newSquare => {
         this.addEdge(neighborMap, currentSquare, newSquare);
@@ -86,7 +84,7 @@ export class Graph {
     this.addEdgesBetweenDifferentPlayers(neighborMap);
 
     // Set headquarter squares to immobile
-    headquarterSquares.forEach(function(square: string) {
+    HEADQUARTER_SQUARES.forEach(function(square: string) {
       neighborMap[square].clear();
     });
 
