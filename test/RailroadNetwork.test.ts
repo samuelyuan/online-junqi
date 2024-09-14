@@ -76,5 +76,3 @@ describe('RailroadNetwork', function () {
     });
   });
 });
-
-export {};

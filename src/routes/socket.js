@@ -6,7 +6,6 @@ var DB = null;
  * Emits an "update" event on success or an "error" event on failure
  */
 var join = function (gameID) {
-
   var sess = this.handshake.session;
   var debugInfo = {
     socketID: this.id,

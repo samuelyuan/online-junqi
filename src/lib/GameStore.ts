@@ -18,7 +18,7 @@ export class GameStore {
     }, (1 * 60 * 60 * 1000), this.games);
   }
 
-  add(gameParams: PlayerSession) {
+  add(gameParams: PlayerSession): string {
     var key = '';
     var keyLength = 7;
     var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -49,7 +49,7 @@ export class GameStore {
     return (this.games.hasOwnProperty(key)) ? this.games[key] : false;
   }
 
-  list() {
+  list(): string[] {
     var listIDs: string[] = [];
     Object.keys(this.games).forEach(key => {
       //if the room is empty, then remove it from the list
