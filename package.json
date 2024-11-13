@@ -31,36 +31,36 @@
     "report-dir": "coverage"
   },
   "dependencies": {
-    "@types/mocha": "^10.0.7",
-    "body-parser": "^1.20.2",
-    "cookie": "^0.6.0",
-    "cookie-parser": "^1.4.6",
+    "@types/mocha": "^10.0.9",
+    "body-parser": "^1.20.3",
+    "cookie": "^1.0.1",
+    "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
     "errorhandler": "^1.5.1",
     "method-override": "^3.0.0",
-    "mocha": "^10.5.2",
+    "mocha": "^10.8.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "pug": "^3.0.3",
     "serve-favicon": "^2.5.0",
-    "underscore": "^1.13.6"
+    "underscore": "^1.13.7"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.0",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.9",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.0",
     "@types/socket.io": "^3.0.2",
     "@types/socket.io-client": "^3.0.0",
-    "@typescript-eslint/parser": "^7.14.1",
-    "express": "^4.21.0",
-    "express-session": "^1.18.0",
-    "nyc": "^17.0.0",
-    "socket.io": "^4.7.5",
+    "@typescript-eslint/parser": "^8.14.0",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "nyc": "^17.1.0",
+    "socket.io": "^4.8.1",
     "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.5.2"
+    "typescript": "^5.6.3"
   }
 }
