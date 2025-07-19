@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { ClientBoard } from '../public/js/lib/clientboard.js';
 
-describe('Client', function () {
+describe('ClientBoard', function () {
     var clientBoard = new ClientBoard();
 
     describe('#generateBoardHtml()', function () {

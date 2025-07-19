@@ -49,18 +49,43 @@ Run unit tests with coverage. Results will be generated in coverage folder.
 npm run test:coverage
 ```
 
-How it Works
----
+## How it Works
 
-The variant of the Junqi game is 1v1 and the two player's front rows are directly connected. There are no intermediate railroads that would exist if the game were to be 2v2. Each player's starting locations have 6 rows and 5 columns, which would generate 30 locations, but 5 of the locations are reserved for bunkers and the remaining 25 are the player's pieces.
+This implementation of Junqi is a 1v1 variant, where both players’ front lines are directly connected without intermediate railroads that typically exist in the 2v2 version.
 
-If we combine both players locations, the board consists of 12 rows by 5 columns. The board state is defined as a map, where the key is the board position, e.g. "a1", and the value denotes the piece, e.g. r10. The board position has the column at the beginning (a, b, c, d, e) and the row number at the end from 1-12. The board piece has the color at the beginning ('r' for red, 'b' for blue) and a rank after (0-11). Generally the lower the rank, the more powerful the piece. Bombs (炸弹) have rank 0, field marshal (司令) has rank 1. The lowest rank 11 is for the flag (军旗).
+### Board Layout
 
-The Board class is responsible for storing the board state, comparing the rankings between pieces, and setting special rules for some of the board locations, such as valid flag locations, valid landmine rows, valid bomb rows etc. The player isn't allowed to setup the pieces
+* Each player starts with a 6-row by 5-column section (30 total positions).
+* 5 of those positions are reserved for bunkers, leaving 25 pieces per player.
+* The combined board is 12 rows by 5 columns.
 
-The Graph class is responsible for defining the adjacency graph for the nodes on the board. Each node is a board location and an edge will be added between two nodes if they are directly adjacent.
+### Board Representation
 
-The RailroadNetwork class is responsible for doing BFS search and allowing units to move across multiple locations, since the units are using the railroad to transport themselves. If the piece isn't on a railroad, the adjacent neighbors are the same as the neighbors in the graph. If the piece is on a railroad, the adjacent neighbors would be all the pieces on the same railroad line and any adjacent neighbors which are one move away without the railroad. Engineers (工兵) are given an exception where they can turn corners and access any location on other railroad lines. The BFS search works by using the current unit's position as the starting point and checking whether each adjacent neighbor is on the railroad and only adds adjacent railroad nodes to the list of reachable nodes.
+* The board is modeled as a map, where:
+  * Keys are positions like `"a1"` (column letter `a-e`, row number `1-12`)
+  * Values are pieces like `"r10"` (e.g., red player’s rank 10 piece)
+* Piece notation:
+  * First character: player color (`r` for red, `b` for blue)
+  * Following number: piece rank (`0`–`11`)
+    * Rank `0`: Bomb (炸弹)
+    * Rank `1`: Field Marshal (司令)
+    * Rank `11`: Flag (军旗)
+
+### Core Classes
+
+* `Board`
+  * Stores the current board state
+  * Compares piece rankings during combat
+  * Enforces setup rules: e.g., where flags, landmines, and bombs may be placed
+* `Graph`
+  * Represents adjacency between board positions
+  * Each node is a square; edges are created for direct (orthogonal) neighbors
+* `RailroadNetwork`
+  * Handles multi-tile movement using BFS (Breadth-First Search)
+  * Determines legal movement for units on railroad tiles
+    * Regular pieces can move along a straight railroad line
+    * Engineers (工兵) can turn at corners and switch between intersecting rail lines
+  * When not on a railroad, unit movement is restricted to basic adjacency (via `Graph`)
 
 Reference
 ---

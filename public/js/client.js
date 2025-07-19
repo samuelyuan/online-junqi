@@ -1,4 +1,11 @@
+import { BoardHighlighter } from "./lib/boardhighlighter.js";
 import { ClientBoard } from "./lib/clientboard.js";
+import {
+    clearHighlights,
+    showErrorMessage,
+    showGameOverMessage,
+    showForfeitPrompt
+} from './lib/uihelpers.js';
 
 var Client = (function (window) {
 
@@ -16,16 +23,11 @@ var Client = (function (window) {
 
     var gameClasses = null;
 
-    var selection = null;
-
-    var prevSelectedSquare = null;
-    var curSelectedSquare = null;
-    var swapStr = null;
-
     var gameOverMessage = null;
     var forfeitPrompt = null;
 
     var clientBoard = new ClientBoard();
+    var boardHighlighter = null; 
 
     /**
     * Initialize the UI
@@ -62,7 +64,9 @@ var Client = (function (window) {
         socket = io.connect();
 
         // Define board based on player's perspective
-        assignSquares();
+        clientBoard.assignSquareIds(squares, playerColor);
+
+        boardHighlighter = new BoardHighlighter(squares, gameState);
 
         // Attach event handlers
         attachDOMEventHandlers();
@@ -76,51 +80,12 @@ var Client = (function (window) {
         socket.emit('join', gameID);
     };
 
-    /**
-    * Assign square IDs and labels based on player's perspective
-    */
-    var assignSquares = function () {
-        var fileLabels = ['A', 'B', 'C', 'D', 'E'];
-        var rankLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-        var squareIDs = [
-            'a12', 'b12', 'c12', 'd12', 'e12',
-            'a11', 'b11', 'c11', 'd11', 'e11',
-            'a10', 'b10', 'c10', 'd10', 'e10',
-            'a9', 'b9', 'c9', 'd9', 'e9',
-            'a8', 'b8', 'c8', 'd8', 'e8',
-            'a7', 'b7', 'c7', 'd7', 'e7',
-            'a6', 'b6', 'c6', 'd6', 'e6',
-            'a5', 'b5', 'c5', 'd5', 'e5',
-            'a4', 'b4', 'c4', 'd4', 'e4',
-            'a3', 'b3', 'c3', 'd3', 'e3',
-            'a2', 'b2', 'c2', 'd2', 'e2',
-            'a1', 'b1', 'c1', 'd1', 'e1'
-        ];
-
-        if (playerColor === 'red') {
-            fileLabels.reverse();
-            rankLabels.reverse();
-            squareIDs.reverse();
-        }
-
-        // Set file and rank labels
-        /* $('.top-edge').each(function(i) { $(this).text(fileLabels[i]); });
-         $('.right-edge').each(function(i) { $(this).text(rankLabels[i]); });
-         $('.bottom-edge').each(function(i) { $(this).text(fileLabels[i]); });
-         $('.left-edge').each(function(i) { $(this).text(rankLabels[i]); });*/
-
-        // Set square IDs
-        squares.each(function (i) {
-            $(this).attr('id', squareIDs[i]);
-        });
-    };
-
     var callbackHighlightSwap = function (color, rank) {
         return function (ev) {
             //for setup, swap pieces
             for (var i = 0; i < gameState.players.length; i++) {
                 if (gameState.players[i].color === playerColor && gameState.players[i].isSetup === false) {
-                    highlightValidSwap(color + rank, ev.target);
+                    boardHighlighter.highlightValidSwap(gameState, color + rank, ev.target);
                 }
             }
         }
@@ -130,7 +95,7 @@ var Client = (function (window) {
         return function (ev) {
             //Show moves for player
             if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
-                highlightValidMoves(color + rank, ev.target);
+                boardHighlighter.highlightValidMoves(gameState, color + rank, ev.target);
             }
         }
     };
@@ -152,7 +117,7 @@ var Client = (function (window) {
 
         // Clear all move highlights
         container.on('click', '.empty', function (ev) {
-            clearHighlights();
+            clearHighlights(squares);
         });
 
         // Perform a regular move
@@ -173,7 +138,7 @@ var Client = (function (window) {
 
         //Swap pieces
         container.on('click', '.valid-swap', function (ev) {
-            var m = swapStr;
+            var m = boardHighlighter.getSwapString();
 
             messages.empty();
             socket.emit('move', { gameID: gameID, move: m });
@@ -187,7 +152,7 @@ var Client = (function (window) {
 
         // Forfeit game
         container.on('click', '#forfeit', function (ev) {
-            showForfeitPrompt(function (confirmed) {
+            showForfeitPrompt(forfeitPrompt, function (confirmed) {
                 if (confirmed) {
                     messages.empty();
                     socket.emit('forfeit', gameID);
@@ -198,11 +163,12 @@ var Client = (function (window) {
     };
 
     var generateMoveString = function (destinationSquare, symbol) {
+        const selection = boardHighlighter.getSelection();
         var piece = selection.pieceStr;
         var src = $('#' + selection.squareId);
         var dest = $(destinationSquare);
 
-        clearHighlights();
+        clearHighlights(squares);
 
         var pieceClass = clientBoard.getPieceClasses(piece, playerColor, gameState);
 
@@ -228,86 +194,8 @@ var Client = (function (window) {
         // Display an error
         socket.on('error', function (data) {
             //console.log(data);
-            showErrorMessage(data);
+            showErrorMessage(messages, data);
         });
-    };
-
-    var highlightValidSwap = function (piece, selectedSquare) {
-        var square = $(selectedSquare);
-        var move = null;
-
-        // Set selection object
-        selection = {
-            pieceStr: piece,
-            squareId: square.attr('id'),
-        };
-
-        // Highlight the selected square
-        squares.removeClass('selected');
-        square.addClass('selected');
-
-        curSelectedSquare = square.attr('id');
-        swapStr = curSelectedSquare + ' ' + 's' + ' ' + prevSelectedSquare;
-
-        // Highlight any valid moves
-        squares.removeClass('valid-swap');
-        for (var i = 0; i < gameState.validSwap.length; i++) {
-            move = gameState.validSwap[i];
-
-            if (move.type === 'swap') {
-                if (move.startSquare === square.attr('id')) {
-                    prevSelectedSquare = square.attr('id');
-                    $('#' + move.endSquare).addClass('valid-swap');
-                }
-            }
-        }
-    }
-
-    /**
-    * Highlight valid moves for the selected piece
-    */
-    var highlightValidMoves = function (piece, selectedSquare) {
-        var square = $(selectedSquare);
-        var move = null;
-
-        // Set selection object
-        selection = {
-            pieceStr: piece,
-            squareId: square.attr('id'),
-        };
-
-        // Highlight the selected square
-        squares.removeClass('selected');
-        square.addClass('selected');
-
-        // Highlight any valid moves
-        squares.removeClass('valid-move valid-attack');
-        for (var i = 0; i < gameState.validMoves.length; i++) {
-            move = gameState.validMoves[i];
-
-            if (move.type === 'move') {
-                // Highlight empty squares to move to
-                if (move.startSquare === square.attr('id')) {
-                    $('#' + move.endSquare).addClass('valid-move');
-                }
-            }
-            else if (move.type === 'attack') {
-                // Highlight squares with enemy pieces
-                if (move.startSquare === square.attr('id')) {
-                    $('#' + move.endSquare).addClass('valid-attack');
-                }
-            }
-        }
-    };
-
-    /**
-    * Clear valid move highlights
-    */
-    var clearHighlights = function () {
-        squares.removeClass('selected');
-        squares.removeClass('valid-move');
-        squares.removeClass('valid-attack');
-        squares.removeClass('valid-swap');
     };
 
     /**
@@ -394,75 +282,21 @@ var Client = (function (window) {
 
         // Test for checkmate
         if (gameState.status === 'checkmate') {
-            if (opponent.inCheck) { showGameOverMessage('checkmate-win'); }
-            if (you.inCheck) { showGameOverMessage('checkmate-lose'); }
+            if (opponent.inCheck) { showGameOverMessage(gameOverMessage, 'checkmate-win'); }
+            if (you.inCheck) { showGameOverMessage(gameOverMessage, 'checkmate-lose'); }
         }
 
         // Test for stalemate
         if (gameState.status === 'nopieces') {
-            if (opponent.hasMoveablePieces === false) { showGameOverMessage('nopieces-win'); }
-            if (you.hasMoveablePieces === false) { showGameOverMessage('nopieces-lose'); }
+            if (opponent.hasMoveablePieces === false) { showGameOverMessage(gameOverMessage, 'nopieces-win'); }
+            if (you.hasMoveablePieces === false) { showGameOverMessage(gameOverMessage, 'nopieces-lose'); }
         }
 
         // Test for forfeit
         if (gameState.status === 'forfeit') {
-            if (opponent.forfeited) { showGameOverMessage('forfeit-win'); }
-            if (you.forfeited) { showGameOverMessage('forfeit-lose'); }
+            if (opponent.forfeited) { showGameOverMessage(gameOverMessage, 'forfeit-win'); }
+            if (you.forfeited) { showGameOverMessage(gameOverMessage, 'forfeit-lose'); }
         }
-    };
-
-    /**
-     * Display an error message on the page
-     */
-    var showErrorMessage = function (data) {
-        var msg, html = '';
-
-        if (data == 'handshake unauthorized') {
-            msg = 'Client connection failed';
-        } else {
-            msg = data.message;
-        }
-
-        html = '<div class="alert alert-danger">' + msg + '</div>';
-        messages.append(html);
-    };
-
-    /**
-     * Display the "Game Over" window
-     */
-    var showGameOverMessage = function (type) {
-        var header = gameOverMessage.find('h2');
-
-        // Set the header's content and CSS classes
-        header.removeClass('alert-success alert-danger alert-warning');
-        switch (type) {
-            case 'checkmate-win': header.addClass('alert-success').text('Captured Flag'); break;
-            case 'checkmate-lose': header.addClass('alert-danger').text('Flag Lost'); break;
-            case 'forfeit-win': header.addClass('alert-success').text('Your opponent has surrendered'); break;
-            case 'forfeit-lose': header.addClass('alert-danger').text('You have surrendered'); break;
-            case 'nopieces-win': header.addClass('alert-success').text('Your opponent has no moveable pieces'); break;
-            case 'nopieces-lose': header.addClass('alert-danger').text('You have no moveable pieces left'); break;
-        }
-        gameOverMessage.modal('show');
-    };
-
-    /**
-     * Display the "Forfeit Game" confirmation prompt
-     */
-    var showForfeitPrompt = function (callback) {
-        // Temporarily attach click handler for the Cancel button, note the use of .one()
-        forfeitPrompt.one('click', '#cancel-forfeit', function (ev) {
-            callback(false);
-            forfeitPrompt.modal('hide');
-        });
-
-        // Temporarily attach click handler for the Confirm button, note the use of .one()
-        forfeitPrompt.one('click', '#confirm-forfeit', function (ev) {
-            callback(true);
-            forfeitPrompt.modal('hide');
-        });
-
-        forfeitPrompt.modal('show');
     };
 
     return init;

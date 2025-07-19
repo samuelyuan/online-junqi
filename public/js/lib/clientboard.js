@@ -83,4 +83,42 @@ export class ClientBoard {
     }
     return piece.substr(1, lengthRank);
   };
+
+  /**
+  * Assign square IDs and labels based on player's perspective
+  */
+  assignSquareIds(squares, playerColor) {
+    const fileLabels = ['A', 'B', 'C', 'D', 'E'];
+    const rankLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    const squareIDs = [
+      'a12', 'b12', 'c12', 'd12', 'e12',
+      'a11', 'b11', 'c11', 'd11', 'e11',
+      'a10', 'b10', 'c10', 'd10', 'e10',
+      'a9', 'b9', 'c9', 'd9', 'e9',
+      'a8', 'b8', 'c8', 'd8', 'e8',
+      'a7', 'b7', 'c7', 'd7', 'e7',
+      'a6', 'b6', 'c6', 'd6', 'e6',
+      'a5', 'b5', 'c5', 'd5', 'e5',
+      'a4', 'b4', 'c4', 'd4', 'e4',
+      'a3', 'b3', 'c3', 'd3', 'e3',
+      'a2', 'b2', 'c2', 'd2', 'e2',
+      'a1', 'b1', 'c1', 'd1', 'e1'
+    ];
+
+    if (playerColor === 'red') {
+      fileLabels.reverse();
+      rankLabels.reverse();
+      squareIDs.reverse();
+    }
+
+    // Set file and rank labels
+    /* $('.top-edge').each(function(i) { $(this).text(fileLabels[i]); });
+     $('.right-edge').each(function(i) { $(this).text(rankLabels[i]); });
+     $('.bottom-edge').each(function(i) { $(this).text(fileLabels[i]); });
+     $('.left-edge').each(function(i) { $(this).text(rankLabels[i]); });*/
+
+    squares.each(function (i) {
+      $(this).attr('id', squareIDs[i]);
+    });
+  }
 }
