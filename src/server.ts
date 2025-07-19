@@ -3,6 +3,7 @@ import session from 'express-session';
 import { MemoryStore } from 'express-session';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import * as httpRoutes from './routes/http';
 
 var bodyParser = require('body-parser'),
   cookie = require('cookie'),
@@ -12,8 +13,7 @@ var bodyParser = require('body-parser'),
   path = require('path'),
   favicon = require('serve-favicon');
 
-var httpRoutes = require('./routes/http'),
-  socketRoutes = require('./routes/socket'),
+var socketRoutes = require('./routes/socket'),
   GameStore = require('./lib/GameStore');
 
 var app = express();

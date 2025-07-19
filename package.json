@@ -5,62 +5,38 @@
   "scripts": {
     "start": "node ./dist/server.js",
     "build": "tsc",
-    "postinstall": "npm run tsc",
+    "dev": "tsx watch ./src/server.ts",
     "tsc": "tsc",
     "test": "mocha --require ts-node/register test/**/*.test.ts",
-    "test:coverage": "nyc npm run test"
-  },
-  "nyc": {
-    "extends": "@istanbuljs/nyc-config-typescript",
-    "check-coverage": true,
-    "all": true,
-    "include": [
-      "src/**/!(*.test.*).[tj]s?(x)",
-      "public/js/client.js",
-      "public/js/lib/**"
-    ],
-    "exclude": [
-      "src/_tests_/**/*.*"
-    ],
-    "reporter": [
-      "html",
-      "lcov",
-      "text",
-      "text-summary"
-    ],
-    "report-dir": "coverage"
+    "test:coverage": "c8 --report-dir=coverage npm run test"
   },
   "dependencies": {
-    "@types/mocha": "^10.0.9",
-    "body-parser": "^1.20.3",
-    "cookie": "^1.0.1",
+    "@types/mocha": "^10.0.10",
+    "body-parser": "^2.2.0",
+    "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
     "errorhandler": "^1.5.1",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "method-override": "^3.0.0",
-    "mocha": "^10.8.2",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
+    "mocha": "^11.7.1",
+    "morgan": "^1.10.1",
     "pug": "^3.0.3",
-    "serve-favicon": "^2.5.0",
+    "serve-favicon": "^2.5.1",
     "underscore": "^1.13.7"
   },
   "devDependencies": {
-    "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@types/express": "^5.0.0",
-    "@types/express-session": "^1.18.0",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.9.0",
-    "@types/socket.io": "^3.0.2",
-    "@types/socket.io-client": "^3.0.0",
-    "@typescript-eslint/parser": "^8.14.0",
-    "express": "^4.21.1",
-    "express-session": "^1.18.1",
-    "nyc": "^17.1.0",
+    "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.14",
+    "@typescript-eslint/parser": "^8.37.0",
+    "c8": "^10.1.3",
     "socket.io": "^4.8.1",
-    "supertest": "^7.0.0",
+    "supertest": "^7.1.3",
     "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.6.3"
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

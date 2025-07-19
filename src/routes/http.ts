@@ -210,7 +210,7 @@ export class HttpRoutes {
 /**
  * Attach route handlers to the app
  */
-exports.attach = function (app: Express.Application, db: GameStore) {
+export function attach(app: Express.Application, db: GameStore) {
   DB = db;
   var httpRoutes = new HttpRoutes();
 
@@ -218,5 +218,6 @@ exports.attach = function (app: Express.Application, db: GameStore) {
   app.get('/game/:id', httpRoutes.game.bind(httpRoutes));
   app.post('/start', httpRoutes.startGame.bind(httpRoutes));
   app.post('/join', httpRoutes.joinGame.bind(httpRoutes));
-  app.all('*', httpRoutes.invalid.bind(httpRoutes));
+  // Catch-all for unmatched routes
+  app.all('/*splat', httpRoutes.invalid.bind(httpRoutes));
 };
