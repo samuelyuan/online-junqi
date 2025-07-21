@@ -1,33 +1,23 @@
 import { BoardHighlighter } from "./lib/boardhighlighter.js";
 import { ClientBoard } from "./lib/clientboard.js";
-import {
-    clearHighlights,
-    showErrorMessage,
-    showGameOverMessage,
-    showForfeitPrompt
-} from './lib/uihelpers.js';
+import SocketManager from './lib/socketmanager.js';
+import GameUIManager from './lib/gameuimanager.js';
 
 var Client = (function (window) {
 
-    var socket = null;
     var gameState = null;
 
     var gameID = null;
     var playerColor = null;
     var playerName = null;
 
-    var container = null;
-    var messages = null;
-    var board = null;
-    var squares = null;
-
     var gameClasses = null;
 
-    var gameOverMessage = null;
-    var forfeitPrompt = null;
-
     var clientBoard = new ClientBoard();
-    var boardHighlighter = null; 
+    var boardHighlighter = null;
+
+    var socketManager = new SocketManager();
+    var uiManager = new GameUIManager();
 
     /**
     * Initialize the UI
@@ -37,20 +27,13 @@ var Client = (function (window) {
         playerColor = config.playerColor;
         playerName = config.playerName;
 
-        container = $('#game');
-        messages = $('#messages');
-        board = $('#board');
+        uiManager.setPlayerColor(playerColor);
 
         var numRows = 12;
         var numColumns = 5;
         var boardHtml = clientBoard.generateBoardHtml(numRows, numColumns);
-        board.append(boardHtml);
-
-        squares = board.find('.square');
-        var setupButton = $('#finishSetup');
-
-        gameOverMessage = $('#game-over');
-        forfeitPrompt = $('#forfeit-game');
+        var squares = uiManager.initBoard(boardHtml);
+        uiManager.initModals();
 
         var colorClasses = "red blue";
         var rankClasses = "";
@@ -60,8 +43,20 @@ var Client = (function (window) {
         gameClasses = colorClasses + " " + rankClasses + " not-moved empty selected " +
             "valid-move valid-attack valid-swap last-move";
 
-        // Create socket connection
-        socket = io.connect();
+        // Create socket connection and join game
+        socketManager.connect(gameID);
+
+        // Subscribe to socket events
+        socketManager.on('update', function (data) {
+            //console.log(data);
+            gameState = data;
+            update();
+        });
+
+        socketManager.on('error', function (data) {
+            //console.log(data);
+            uiManager.showErrorMessage(data);
+        });
 
         // Define board based on player's perspective
         clientBoard.assignSquareIds(squares, playerColor);
@@ -70,14 +65,6 @@ var Client = (function (window) {
 
         // Attach event handlers
         attachDOMEventHandlers();
-        attachSocketEventHandlers();
-
-        // Initialize modal popup windows
-        gameOverMessage.modal({ show: false, keyboard: false, backdrop: 'static' });
-        forfeitPrompt.modal({ show: false, keyboard: false, backdrop: 'static' });
-
-        // Join game
-        socket.emit('join', gameID);
     };
 
     var callbackHighlightSwap = function (color, rank) {
@@ -105,70 +92,67 @@ var Client = (function (window) {
      */
     var attachDOMEventHandlers = function () {
         var baseString = '.' + playerColor + '.rank';
+        var squares = uiManager.getSquares();
+
         // All pieces can be swapped
         for (var i = 0; i <= 11; i++) {
-            container.on('click', baseString + i.toString(), callbackHighlightSwap(playerColor[0], i.toString()));
+            uiManager.container.on('click', baseString + i.toString(), callbackHighlightSwap(playerColor[0], i.toString()));
         }
 
         // Only highlight movable pieces
         for (var i = 0; i < 10; i++) {
-            container.on('click', baseString + i.toString(), callbackHighlightMoves(playerColor[0], i.toString()));
+            uiManager.container.on('click', baseString + i.toString(), callbackHighlightMoves(playerColor[0], i.toString()));
         }
 
         // Clear all move highlights
-        container.on('click', '.empty', function (ev) {
-            clearHighlights(squares);
+        uiManager.container.on('click', '.empty', function (ev) {
+            uiManager.clearHighlights();
         });
 
         // Perform a regular move
-        container.on('click', '.valid-move', function (ev) {
+        uiManager.container.on('click', '.valid-move', function (ev) {
             var m = generateMoveString(ev.target, '-');
-
-            messages.empty();
-            socket.emit('move', { gameID: gameID, move: m });
+            uiManager.clearMessages();
+            socketManager.sendMove(gameID, m);
         });
 
         // Attack the opponent's piece
-        container.on('click', '.valid-attack', function (ev) {
+        uiManager.container.on('click', '.valid-attack', function (ev) {
             var m = generateMoveString(ev.target, 'x');
-
-            messages.empty();
-            socket.emit('move', { gameID: gameID, move: m });
+            uiManager.clearMessages();
+            socketManager.sendMove(gameID, m);
         });
 
         //Swap pieces
-        container.on('click', '.valid-swap', function (ev) {
+        uiManager.container.on('click', '.valid-swap', function (ev) {
             var m = boardHighlighter.getSwapString();
-
-            messages.empty();
-            socket.emit('move', { gameID: gameID, move: m });
+            uiManager.clearMessages();
+            socketManager.sendMove(gameID, m);
         });
 
         //Finish setup
-        container.on('click', '#finishSetup', function (ev) {
-            socket.emit('finishSetup', gameID);
+        uiManager.container.on('click', '#finishSetup', function (ev) {
+            socketManager.finishSetup(gameID);
         });
 
-
         // Forfeit game
-        container.on('click', '#forfeit', function (ev) {
-            showForfeitPrompt(forfeitPrompt, function (confirmed) {
+        uiManager.container.on('click', '#forfeit', function (ev) {
+            uiManager.showForfeitPrompt(function (confirmed) {
                 if (confirmed) {
-                    messages.empty();
-                    socket.emit('forfeit', gameID);
+                    uiManager.clearMessages();
+                    socketManager.forfeit(gameID);
                 }
             });
-
         });
     };
 
     var generateMoveString = function (destinationSquare, symbol) {
         const selection = boardHighlighter.getSelection();
         var piece = selection.pieceStr;
-        var src = $('#' + selection.squareId);
-        var dest = $(destinationSquare);
+        var src = uiManager.getElement(selection.squareId);
+        var dest = uiManager.getElementFromDOM(destinationSquare);
 
-        clearHighlights(squares);
+        uiManager.clearHighlights();
 
         var pieceClass = clientBoard.getPieceClasses(piece, playerColor, gameState);
 
@@ -181,121 +165,40 @@ var Client = (function (window) {
     }
 
     /**
-    * Attach Socket.IO event handlers
-    */
-    var attachSocketEventHandlers = function () {
-        // Update UI with new game state
-        socket.on('update', function (data) {
-            //console.log(data);
-            gameState = data;
-            update();
-        });
-
-        // Display an error
-        socket.on('error', function (data) {
-            //console.log(data);
-            showErrorMessage(messages, data);
-        });
-    };
-
-    /**
      * Update UI from game state
      */
     var update = function () {
-        var you, opponent = null;
-
-        var container, name, status, captures = null;
+        const activeColor = gameState.activePlayer?.color;
 
         // Update player info
-        for (var i = 0; i < gameState.players.length; i++) {
-            // Determine if player is you or opponent
-            if (gameState.players[i].color === playerColor) {
-                you = gameState.players[i];
-                container = $('#you');
-            }
-            else if (gameState.players[i].color !== playerColor) {
-                opponent = gameState.players[i];
-                container = $('#opponent');
-            }
-
-            name = container.find('strong');
-            status = container.find('.status');
-            captures = container.find('ul');
-
-            // Name
-            if (gameState.players[i].name) {
-                //if the player quits midgame, don't show any name
-                if (gameState.players[i].joined === false) {
-                    name.text("...");
-                    gameState.players[i].name = null;
-                }
-                else {
-                    name.text(gameState.players[i].name);
-                }
-            }
-
-            // Active Status
-            container.removeClass('active-player');
-            if (gameState.activePlayer && gameState.activePlayer.color === gameState.players[i].color) {
-                container.addClass('active-player');
-            }
-
-            //Setup Status
-            container.removeClass('setup-player ready-player');
-            if (gameState.players[i].isSetup === false) {
-                container.addClass('setup-player');
-            }
-            else if (gameState.players[i].isSetup === true && gameState.status === 'pending') {
-                container.addClass('ready-player');
-            }
-
-            // Check Status
-            /*status.removeClass('label label-danger').text('');
-            if (gameState.players[i].inCheck) {
-              status.addClass('label label-danger').text('Check');
-            }*/
-
-            // Captured Pieces
-            /*captures.empty();
-            for (var j=0; j<gameState.capturedPieces.length; j++) {
-              if (gameState.capturedPieces[j][0] !== gameState.players[i].color[0]) {
-                captures.append('<li class="'+getPieceClasses(gameState.capturedPieces[j])+'"></li>');
-              }
-            }*/
-        }
+        uiManager.updatePlayerPanels(gameState.players, activeColor, gameState.status);
 
         // Update board
-        for (var sq in gameState.board.boardState) {
-            var piece = gameState.board.boardState[sq];
-            var pieceStr = (piece == null) ? null : (piece.colorChar + piece.rankStr);
-            var pieceClass = clientBoard.getPieceClasses(pieceStr, playerColor, gameState);
-            $('#' + sq).removeClass(gameClasses).addClass(pieceClass);
-        }
+        uiManager.renderBoard(gameState.board.boardState, playerColor, gameState, clientBoard, gameClasses);
 
         // Highlight last move
-        if (gameState.lastMove) {
-            if (gameState.lastMove.type === 'move' || gameState.lastMove.type === 'attack') {
-                $('#' + gameState.lastMove.startSquare).addClass('last-move');
-                $('#' + gameState.lastMove.endSquare).addClass('last-move');
-            }
-        }
+        uiManager.highlightLastMove(gameState.lastMove);
+
+        // Identify you and opponent
+        const you = gameState.players.find(p => p.color === playerColor);
+        const opponent = gameState.players.find(p => p.color !== playerColor);
 
         // Test for checkmate
         if (gameState.status === 'checkmate') {
-            if (opponent.inCheck) { showGameOverMessage(gameOverMessage, 'checkmate-win'); }
-            if (you.inCheck) { showGameOverMessage(gameOverMessage, 'checkmate-lose'); }
+            if (opponent.inCheck) { uiManager.showGameOver('checkmate-win'); }
+            if (you.inCheck) { uiManager.showGameOver('checkmate-lose'); }
         }
 
         // Test for stalemate
         if (gameState.status === 'nopieces') {
-            if (opponent.hasMoveablePieces === false) { showGameOverMessage(gameOverMessage, 'nopieces-win'); }
-            if (you.hasMoveablePieces === false) { showGameOverMessage(gameOverMessage, 'nopieces-lose'); }
+            if (!opponent.hasMoveablePieces) { uiManager.showGameOver('nopieces-win'); }
+            if (!you.hasMoveablePieces) { uiManager.showGameOver('nopieces-lose'); }
         }
 
         // Test for forfeit
         if (gameState.status === 'forfeit') {
-            if (opponent.forfeited) { showGameOverMessage(gameOverMessage, 'forfeit-win'); }
-            if (you.forfeited) { showGameOverMessage(gameOverMessage, 'forfeit-lose'); }
+            if (opponent.forfeited) { uiManager.showGameOver('forfeit-win'); }
+            if (you.forfeited) { uiManager.showGameOver('forfeit-lose'); }
         }
     };
 
