@@ -81,4 +81,36 @@ describe('ClientBoard', function () {
             assert.equal(pieceClass, "red rank11");
         });
     });
+
+    describe('#generateSquareIds()', function () {
+        it('should generate correct square IDs for red player', function () {
+            const fileLabels = ['A', 'B', 'C', 'D', 'E'];
+            const rankLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+            const playerColor = 'red';
+
+            // Get generated square IDs for red player
+            const squareIds = clientBoard.generateSquareIds(fileLabels, rankLabels, playerColor);
+
+            // Check the first few square IDs for the red player
+            assert.equal(squareIds[0], 'e1');  // Top-right corner should be 'e12' for red
+            assert.equal(squareIds[1], 'd1');  // Next square should be 'd12' for red
+            assert.equal(squareIds[2], 'c1');  // And so on...
+            assert.equal(squareIds[59], 'a12');  // Bottom-left corner for red
+        });
+
+        it('should generate correct square IDs for blue player', function () {
+            const fileLabels = ['A', 'B', 'C', 'D', 'E'];
+            const rankLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+            const playerColor = 'blue';
+
+            // Get generated square IDs for blue player
+            const squareIds = clientBoard.generateSquareIds(fileLabels, rankLabels, playerColor);
+
+            // Check the first few square IDs for the blue player
+            assert.equal(squareIds[0], 'a12');   // Top-left corner should be 'a1' for blue
+            assert.equal(squareIds[1], 'b12');   // Next square should be 'b1' for blue
+            assert.equal(squareIds[2], 'c12');   // And so on...
+            assert.equal(squareIds[59], 'e1'); // Bottom-right corner for blue
+        });
+    });
 });

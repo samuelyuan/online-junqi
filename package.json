@@ -8,7 +8,7 @@
     "dev": "tsx watch ./src/server.ts",
     "tsc": "tsc",
     "test": "mocha --require ts-node/register test/**/*.test.ts",
-    "test:coverage": "c8 --report-dir=coverage npm run test"
+    "test:coverage": "c8 --reporter=html --report-dir=coverage npm run test"
   },
   "dependencies": {
     "@types/mocha": "^10.0.10",

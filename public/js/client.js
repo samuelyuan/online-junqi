@@ -96,47 +96,47 @@ var Client = (function (window) {
 
         // All pieces can be swapped
         for (var i = 0; i <= 11; i++) {
-            uiManager.container.on('click', baseString + i.toString(), callbackHighlightSwap(playerColor[0], i.toString()));
+            uiManager.gameRoot.on('click', baseString + i.toString(), callbackHighlightSwap(playerColor[0], i.toString()));
         }
 
         // Only highlight movable pieces
         for (var i = 0; i < 10; i++) {
-            uiManager.container.on('click', baseString + i.toString(), callbackHighlightMoves(playerColor[0], i.toString()));
+            uiManager.gameRoot.on('click', baseString + i.toString(), callbackHighlightMoves(playerColor[0], i.toString()));
         }
 
         // Clear all move highlights
-        uiManager.container.on('click', '.empty', function (ev) {
+        uiManager.gameRoot.on('click', '.empty', function (ev) {
             uiManager.clearHighlights();
         });
 
         // Perform a regular move
-        uiManager.container.on('click', '.valid-move', function (ev) {
+        uiManager.gameRoot.on('click', '.valid-move', function (ev) {
             var m = generateMoveString(ev.target, '-');
             uiManager.clearMessages();
             socketManager.sendMove(gameID, m);
         });
 
         // Attack the opponent's piece
-        uiManager.container.on('click', '.valid-attack', function (ev) {
+        uiManager.gameRoot.on('click', '.valid-attack', function (ev) {
             var m = generateMoveString(ev.target, 'x');
             uiManager.clearMessages();
             socketManager.sendMove(gameID, m);
         });
 
         //Swap pieces
-        uiManager.container.on('click', '.valid-swap', function (ev) {
+        uiManager.gameRoot.on('click', '.valid-swap', function (ev) {
             var m = boardHighlighter.getSwapString();
             uiManager.clearMessages();
             socketManager.sendMove(gameID, m);
         });
 
         //Finish setup
-        uiManager.container.on('click', '#finishSetup', function (ev) {
+        uiManager.gameRoot.on('click', '#finishSetup', function (ev) {
             socketManager.finishSetup(gameID);
         });
 
         // Forfeit game
-        uiManager.container.on('click', '#forfeit', function (ev) {
+        uiManager.gameRoot.on('click', '#forfeit', function (ev) {
             uiManager.showForfeitPrompt(function (confirmed) {
                 if (confirmed) {
                     uiManager.clearMessages();

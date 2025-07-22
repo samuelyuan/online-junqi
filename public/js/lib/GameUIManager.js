@@ -1,57 +1,31 @@
-// Helper functions
-export function clearHighlights(squares) {
-    squares.removeClass('selected valid-move valid-attack valid-swap');
-}
+// Constants
+const GAME_OVER_TYPES = {
+    'checkmate-win': ['alert-success', 'Captured Flag'],
+    'checkmate-lose': ['alert-danger', 'Flag Lost'],
+    'forfeit-win': ['alert-success', 'Your opponent has surrendered'],
+    'forfeit-lose': ['alert-danger', 'You have surrendered'],
+    'nopieces-win': ['alert-success', 'Your opponent has no moveable pieces'],
+    'nopieces-lose': ['alert-danger', 'You have no moveable pieces left'],
+};
 
-export function showErrorMessage(messages, data) {
-    const msg = (data === 'handshake unauthorized')
-        ? 'Client connection failed'
-        : data.message;
-
-    messages.append(`<div class="alert alert-danger">${msg}</div>`);
-}
-
-export function showGameOverMessage(gameOverMessage, type) {
-    const header = gameOverMessage.find('h2');
-    header.removeClass('alert-success alert-danger alert-warning');
-
-    const typeToText = {
-        'checkmate-win': ['alert-success', 'Captured Flag'],
-        'checkmate-lose': ['alert-danger', 'Flag Lost'],
-        'forfeit-win': ['alert-success', 'Your opponent has surrendered'],
-        'forfeit-lose': ['alert-danger', 'You have surrendered'],
-        'nopieces-win': ['alert-success', 'Your opponent has no moveable pieces'],
-        'nopieces-lose': ['alert-danger', 'You have no moveable pieces left'],
-    };
-
-    const [cls, text] = typeToText[type];
-    header.addClass(cls).text(text);
-    gameOverMessage.modal('show');
-}
-
-export function showForfeitPrompt(forfeitPrompt, callback) {
-    forfeitPrompt.one('click', '#cancel-forfeit', function () {
-        callback(false);
-        forfeitPrompt.modal('hide');
-    });
-
-    forfeitPrompt.one('click', '#confirm-forfeit', function () {
-        callback(true);
-        forfeitPrompt.modal('hide');
-    });
-
-    forfeitPrompt.modal('show');
-}
+const CLASS_NAMES = {
+    highlight: 'selected valid-move valid-attack valid-swap',
+    lastMove: 'last-move',
+};
 
 class GameUIManager {
     constructor() {
-        this.container = $('#game');
-        this.messages = $('#messages');
-        this.board = $('#board');
+        this.gameRoot = this.getElement('game');
+        this.messages = this.getElement('messages');
+        this.board = this.getElement('board');
         this.squares = null;
-        this.gameOverMessage = $('#game-over');
-        this.forfeitPrompt = $('#forfeit-game');
-        this.playerColor = null; // will be set via init
+        this.gameOverMessage = this.getElement('game-over');
+        this.forfeitPrompt = this.getElement('forfeit-game');
+        this.playerColor = null;
+        this.containers = {
+            you: this.getElement('you'),
+            opponent: this.getElement('opponent'),
+        };
     }
 
     initBoard(html) {
@@ -61,8 +35,9 @@ class GameUIManager {
     }
 
     initModals() {
-        this.gameOverMessage.modal({ show: false, keyboard: false, backdrop: 'static' });
-        this.forfeitPrompt.modal({ show: false, keyboard: false, backdrop: 'static' });
+        const modalConfig = { show: false, keyboard: false, backdrop: 'static' };
+        this.gameOverMessage.modal(modalConfig);
+        this.forfeitPrompt.modal(modalConfig);
     }
 
     setPlayerColor(color) {
@@ -73,16 +48,38 @@ class GameUIManager {
         this.messages.empty();
     }
 
-    showErrorMessage(errorData) {
-        showErrorMessage(this.messages, errorData);
+    showErrorMessage(data) {
+        const msg = (data === 'handshake unauthorized')
+            ? 'Client connection failed'
+            : data.message;
+
+        this.messages.append(`<div class="alert alert-danger">${msg}</div>`);
     }
 
     showForfeitPrompt(callback) {
-        showForfeitPrompt(this.forfeitPrompt, callback);
+        this.forfeitPrompt.one('click', '#cancel-forfeit', () => {
+            callback(false);
+            this.forfeitPrompt.modal('hide');
+        });
+
+        this.forfeitPrompt.one('click', '#confirm-forfeit', () => {
+            callback(true);
+            this.forfeitPrompt.modal('hide');
+        });
+
+        this.forfeitPrompt.modal('show');
     }
 
     showGameOver(type) {
-        showGameOverMessage(this.gameOverMessage, type);
+        const header = this.gameOverMessage.find('h2');
+        header.removeClass('alert-success alert-danger alert-warning');
+
+        const typeEntry = GAME_OVER_TYPES[type];
+        if (!typeEntry) return;
+
+        const [cls, text] = typeEntry;
+        header.addClass(cls).text(text);
+        this.gameOverMessage.modal('show');
     }
 
     getElement(id) {
@@ -98,38 +95,39 @@ class GameUIManager {
     }
 
     clearHighlights() {
-        this.squares.removeClass('selected valid-move valid-attack valid-swap');
+        this.squares.removeClass(CLASS_NAMES.highlight);
+    }
+
+    getPlayerContainer(color) {
+        return color === this.playerColor ? this.containers.you : this.containers.opponent;
+    }
+
+    setPlayerName(container, player) {
+        const name = container.find('strong');
+        if (player.name) {
+            name.text(player.joined === false ? "..." : player.name);
+        }
+    }
+
+    setPlayerStatus(container, player, activeColor, gameStatus) {
+        container.removeClass('active-player');
+        if (activeColor === player.color) {
+            container.addClass('active-player');
+        }
+
+        container.removeClass('setup-player ready-player');
+        if (player.isSetup === false) {
+            container.addClass('setup-player');
+        } else if (player.isSetup === true && gameStatus === 'pending') {
+            container.addClass('ready-player');
+        }
     }
 
     updatePlayerPanels(players, activeColor, gameStatus) {
         players.forEach(player => {
-            const container = (player.color === this.playerColor) ? $('#you') : $('#opponent');
-            const name = container.find('strong');
-            const status = container.find('.status');
-            const captures = container.find('ul');
-
-            // Name
-            if (player.name) {
-                if (player.joined === false) {
-                    name.text("...");
-                } else {
-                    name.text(player.name);
-                }
-            }
-
-            // Active status
-            container.removeClass('active-player');
-            if (activeColor === player.color) {
-                container.addClass('active-player');
-            }
-
-            // Setup status
-            container.removeClass('setup-player ready-player');
-            if (player.isSetup === false) {
-                container.addClass('setup-player');
-            } else if (player.isSetup === true && gameStatus === 'pending') {
-                container.addClass('ready-player');
-            }
+            const container = this.getPlayerContainer(player.color);
+            this.setPlayerName(container, player);
+            this.setPlayerStatus(container, player, activeColor, gameStatus);
 
             // Check status
             /*status.removeClass('label label-danger').text('');
@@ -159,8 +157,8 @@ class GameUIManager {
     highlightLastMove(lastMove) {
         if (!lastMove) return;
         if (lastMove.type === 'move' || lastMove.type === 'attack') {
-            this.getElement(lastMove.startSquare).addClass('last-move');
-            this.getElement(lastMove.endSquare).addClass('last-move');
+            this.getElement(lastMove.startSquare).addClass(CLASS_NAMES.lastMove);
+            this.getElement(lastMove.endSquare).addClass(CLASS_NAMES.lastMove);
         }
     }
 }

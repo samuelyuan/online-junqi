@@ -1,71 +1,49 @@
 export class ClientBoard {
+  // Generate the board HTML with dynamic rows and columns
   generateBoardHtml(numRows, numColumns) {
-    // Dynamically create board because most of the rows and columns are the same
+    const topRow = this.generateBoardRow(numColumns, "top-left-corner", "top-edge", "top-right-corner");
+    const bottomRow = this.generateBoardRow(numColumns, "bottom-left-corner", "bottom-edge", "bottom-right-corner");
 
-    var boardHtml = "";
-
-    // Top row border
-    var topRow = this.generateBoardRow(numColumns, "top-left-corner", "top-edge", "top-right-corner");
-    boardHtml += topRow;
-
-    // Create a new row to display pieces
-    for (var row = 1; row <= numRows; row++) {
-      var curRow = this.generateBoardRow(numColumns, "left-edge", "square", "right-edge");
-      boardHtml += curRow;
+    const rows = [];
+    // Create the rows for the board
+    for (let row = 1; row <= numRows; row++) {
+      rows.push(this.generateBoardRow(numColumns, "left-edge", "square", "right-edge"));
     }
 
-    // Bottom row border
-    var bottomRow = this.generateBoardRow(numColumns, "bottom-left-corner", "bottom-edge", "bottom-right-corner");
-    boardHtml += bottomRow;
-
-    return boardHtml;
+    // Return the entire board HTML
+    return `${topRow}${rows.join('')}${bottomRow}`;
   }
 
+  // Generate a single row of the board
   generateBoardRow(numColumns, leftSquareClass, middleSquareClass, rightSquareClass) {
-    var row = "";
-    row += "<tr>";
-    row += "<td class='" + leftSquareClass + "'></td>";
-    for (var col = 1; col <= numColumns; col++) {
-      row += "<td class='" + middleSquareClass + "'></td>";
+    let row = `<tr><td class='${leftSquareClass}'></td>`;
+    for (let col = 1; col <= numColumns; col++) {
+      row += `<td class='${middleSquareClass}'></td>`;
     }
-    row += "<td class='" + rightSquareClass + "'></td>";
-    row += "</tr>";
+    row += `<td class='${rightSquareClass}'></td></tr>`;
     return row;
   }
 
-  /**
- * Get the corresponding CSS classes for a given piece
- */
+  // Get the corresponding CSS classes for a given piece
   getPieceClasses(piece, playerColor, gameState) {
-    if (piece == null) {
+    if (!piece) {
       return 'empty';
     }
 
-    var pieceColor = piece[0];
-    var pieceRank = this.getPieceRank(piece);
-    var colorNameMap = { 'r': 'red', 'b': 'blue' };
-    var colorClassName = colorNameMap[pieceColor];
+    const pieceColor = piece[0];
+    const pieceRank = this.getPieceRank(piece);
+    const colorClassName = this.getColorClass(pieceColor);
     const RANK_FLAG = "11";
 
-    //Don't reveal any of your opponent's pieces (the only exception is the flag which can be revealed after the commander dies)
+    // Don't reveal opponent's pieces unless they are set up or the flag is revealed
     if (playerColor[0] !== pieceColor) {
-      // The piece doesn't have an owner
-      if (!(pieceColor in gameState.colorMap)) {
-        // Should not reach this point
-        throw new Error(`Current piece color ${pieceColor} is not in color map ${JSON.stringify(gameState.colorMap)}`);
-      }
-
-      // Find the owner of that piece
-      var pieceOwner = gameState.colorMap[pieceColor];
-
-      //Check to make sure pieces are setup
-      //If your opponent's pieces aren't setup, don't display anything
-      if (gameState.players[pieceOwner].isSetup === false) {
+      const pieceOwner = gameState.colorMap[pieceColor];
+      if (!gameState.players[pieceOwner].isSetup) {
         return '';
       }
 
       //Display flag when commander dies
-      if (pieceRank === RANK_FLAG && gameState.players[pieceOwner].hasCommander === false) {
+      if (pieceRank === RANK_FLAG && !gameState.players[pieceOwner].hasCommander) {
         return `${colorClassName} rank${RANK_FLAG}`;
       }
 
@@ -74,22 +52,33 @@ export class ClientBoard {
     }
 
     return `${colorClassName} rank${pieceRank}`;
-  };
+  }
 
+  // Utility function to map color to class name
+  getColorClass(pieceColor) {
+    const colorNameMap = { 'r': 'red', 'b': 'blue' };
+    return colorNameMap[pieceColor] || '';
+  }
+
+  // Get the rank of the piece from its string
   getPieceRank(piece) {
-    var lengthRank = piece.length - 1;
-    if (piece[piece.length - 1] === '_') {
-      lengthRank = piece.length - 2;
-    }
+    const lengthRank = piece.endsWith('_') ? piece.length - 2 : piece.length - 1;
     return piece.substr(1, lengthRank);
-  };
+  }
 
-  /**
-  * Assign square IDs and labels based on player's perspective
-  */
+  // Assign square IDs and labels based on player's perspective
   assignSquareIds(squares, playerColor) {
     const fileLabels = ['A', 'B', 'C', 'D', 'E'];
     const rankLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    const squareIDs = this.generateSquareIds(fileLabels, rankLabels, playerColor);
+
+    squares.each((i) => {
+      $(squares[i]).attr('id', squareIDs[i]);
+    });
+  }
+
+  // Generate square IDs based on player color (mirroring for opponent's perspective)
+  generateSquareIds(fileLabels, rankLabels, playerColor) {
     const squareIDs = [
       'a12', 'b12', 'c12', 'd12', 'e12',
       'a11', 'b11', 'c11', 'd11', 'e11',
@@ -117,8 +106,6 @@ export class ClientBoard {
      $('.bottom-edge').each(function(i) { $(this).text(fileLabels[i]); });
      $('.left-edge').each(function(i) { $(this).text(rankLabels[i]); });*/
 
-    squares.each(function (i) {
-      $(this).attr('id', squareIDs[i]);
-    });
+    return squareIDs;
   }
 }
