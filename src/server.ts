@@ -4,26 +4,25 @@ import { MemoryStore } from 'express-session';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import * as httpRoutes from './routes/http';
+import bodyParser from 'body-parser';
+import cookie from 'cookie';
+import errorHandler from 'errorhandler';
+import logger from 'morgan';
+import methodOverride from 'method-override';
+import path from 'path';
+import favicon from 'serve-favicon';
+import * as socketRoutes from './routes/socket';
+import { GameStore } from './lib/GameStore';
+import { SessionData, SocketHandshake } from './types';
 
-var bodyParser = require('body-parser'),
-  cookie = require('cookie'),
-  errorHandler = require('errorhandler'),
-  logger = require('morgan'),
-  methodOverride = require('method-override'),
-  path = require('path'),
-  favicon = require('serve-favicon');
-
-var socketRoutes = require('./routes/socket'),
-  GameStore = require('./lib/GameStore');
-
-var app = express();
-var server = createServer(app);
+const app = express();
+const server = createServer(app);
 // Create a Socket.IO server
-var io = new Server(server);
+const io = new Server(server);
 
-var DB = new GameStore();
+const DB = new GameStore();
 
-var sessionStore = new MemoryStore();
+const sessionStore = new MemoryStore();
 
 // Settings
 app.set('port', process.env.PORT || 3000);
@@ -51,17 +50,40 @@ if ('development' == app.get('env')) {
  * Only allow socket connections that come from clients with an established session.
  */
 io.use(function (socket, next) {
-  var cookies = cookie.parse(socket.handshake.headers.cookie);
+  const cookieHeader = socket.handshake.headers.cookie;
+  if (!cookieHeader) {
+    return next(new Error('No cookie header found'));
+  }
+  const cookies = cookie.parse(cookieHeader);
   // connect.sid comes with extra information
-  var sessionId: string = cookies['connect.sid'].split('.')[0].split(':')[1];
+  const sessionId = cookies['connect.sid'];
+  
+  if (!sessionId) {
+    return next(new Error('No session cookie found'));
+  }
+  
+  const sessionIdParts = sessionId.split('.')[0].split(':');
+  const sessionIdClean = sessionIdParts[1];
+  
+  if (!sessionIdClean) {
+    return next(new Error('Invalid session ID format'));
+  }
 
-  sessionStore.load(sessionId, function (err, session) {
+  sessionStore.load(sessionIdClean, function (err, session) {
     if (err) {
       return next(err);
     }
-    (socket.handshake as any).session = session;
-    var authorized = (socket.handshake as any).session ? true : false;
-    if (authorized) {
+    
+    // Check if session has our custom properties
+    const customSession = session as any;
+    if (customSession && customSession.gameID && customSession.playerColor && customSession.playerName) {
+      // Create a proper SessionData object
+      const sessionData: SessionData = {
+        gameID: customSession.gameID,
+        playerColor: customSession.playerColor,
+        playerName: customSession.playerName
+      };
+      (socket.handshake as any).session = sessionData;
       next(); // Proceed to the next middleware
     } else {
       next(new Error('Not authorized')); // Pass an error if not authorized
@@ -74,7 +96,23 @@ io.use(function (socket, next) {
 httpRoutes.attach(app, DB);
 socketRoutes.attach(io, DB);
 
-// And away we go
-server.listen(app.get('port'), () => {
-  console.log('Online Junqi is listening on port ' + app.get('port'));
+// Handle socket disconnection
+io.sockets.on('disconnect', function (socket) {
+  const sess = (socket.handshake as any).session as SessionData;
+  if (sess && sess.gameID) {
+    const game = DB.find(sess.gameID);
+    if (game) {
+      game.removePlayer(sess);
+    }
+  }
 });
+
+// And away we go
+const port = app.get('port');
+if (port) {
+  server.listen(port, () => {
+    console.log('Online Junqi is listening on port ' + port);
+  });
+} else {
+  console.error('Port is not defined');
+}

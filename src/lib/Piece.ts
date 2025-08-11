@@ -1,79 +1,92 @@
-export const RANK_BOMB: string = "0";
-export const RANK_COMMANDER: string = "1";
-export const RANK_ENGINEER: string = "9";
-export const RANK_LANDMINE: string = "10";
-export const RANK_FLAG: string = "11";
+export enum PieceRank {
+  BOMB = 0,
+  COMMANDER = 1,
+  GENERAL = 2,
+  MAJOR_GENERAL = 3,
+  BRIGADIER_GENERAL = 4,
+  COLONEL = 5,
+  MAJOR = 6,
+  CAPTAIN = 7,
+  LIEUTENANT = 8,
+  ENGINEER = 9,
+  LANDMINE = 10,
+  FLAG = 11
+}
 
-const COMPARE_RANK1_LOSE: number = -1;
-const COMPARE_DRAW: number = 0;
-const COMPARE_RANK1_WIN: number = 1;
+export enum GameResult {
+  WIN = 1,
+  DRAW = 0,
+  LOSE = -1
+}
 
 export class Piece {
   colorChar: string;
-  rankStr: string;
+  rank: PieceRank;
 
-  constructor(colorChar: string, rankStr: string) {
+  constructor(colorChar: string, rank: PieceRank) {
     this.colorChar = colorChar;
-    this.rankStr = rankStr;
+    this.rank = rank;
   }
 
   getPieceColor(): string {
     return this.colorChar;
   }
 
-  getRank(): string {
-    return this.rankStr;
+  getRank(): PieceRank {
+    return this.rank;
+  }
+
+  getRankString(): string {
+    return this.rank.toString();
   }
 
   isMovable(): boolean {
-    return this.rankStr != RANK_LANDMINE && this.rankStr != RANK_FLAG;
+    return this.rank !== PieceRank.LANDMINE && this.rank !== PieceRank.FLAG;
   }
 
-  // compares rank1 and rank2
-  // returns  1 if rank1 is greater than rank2
-  //          0 if they are equal
-  //          -1 if rank 1 is lower than rank2
-  // Input parameters are strings
-  compareRank(otherPiece: Piece): number {
-    const rank1 = this.rankStr;
-    const rank2 = otherPiece.rankStr;
+  // compares this piece's rank with another piece's rank
+  // returns  1 if this piece wins
+  //          0 if they draw
+  //          -1 if this piece loses
+  compareRank(otherPiece: Piece): GameResult {
+    const rank1 = this.rank;
+    const rank2 = otherPiece.rank;
 
     // the opponent is a bomb, which destroys any piece that hits it
-    if (rank1 == RANK_BOMB || rank2 == RANK_BOMB) {
-      return COMPARE_DRAW;
+    if (rank1 === PieceRank.BOMB || rank2 === PieceRank.BOMB) {
+      return GameResult.DRAW;
     }
 
     // the opponent is a flag, which any of your pieces can capture
-    if (rank2 == RANK_FLAG) {
-      return COMPARE_RANK1_WIN;
+    if (rank2 === PieceRank.FLAG) {
+      return GameResult.WIN;
     }
 
     // the opponent is a landmine, which only the engineer can disable
-    if (rank2 == RANK_LANDMINE) {
+    if (rank2 === PieceRank.LANDMINE) {
       // engineer disables landmine
-      if (rank1 == RANK_ENGINEER) {
-        return COMPARE_RANK1_WIN;
+      if (rank1 === PieceRank.ENGINEER) {
+        return GameResult.WIN;
       } else {
         // no other piece can disable it
-        return COMPARE_RANK1_LOSE;
+        return GameResult.LOSE;
       }
     }
 
     // 2 regular pieces
     // the lower the number, the higher the rank (1 beats 2, 2 beats 3, etc.)
-    var rank1Int = parseInt(rank1);
-    var rank2Int = parseInt(rank2);
-    if (rank1Int >= 1 && rank1Int <= 9 && rank2Int >= 1 && rank2Int <= 9) {
-      if (rank1Int < rank2Int) {
-        return COMPARE_RANK1_WIN;
-      } else if (rank1Int === rank2Int) {
-        return COMPARE_DRAW;
+    if (rank1 >= PieceRank.COMMANDER && rank1 <= PieceRank.ENGINEER && 
+        rank2 >= PieceRank.COMMANDER && rank2 <= PieceRank.ENGINEER) {
+      if (rank1 < rank2) {
+        return GameResult.WIN;
+      } else if (rank1 === rank2) {
+        return GameResult.DRAW;
       } else {
-        return COMPARE_RANK1_LOSE;
+        return GameResult.LOSE;
       }
     }
 
     // should not reach this point
-    return COMPARE_DRAW;
+    return GameResult.DRAW;
   }
 }

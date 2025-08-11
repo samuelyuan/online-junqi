@@ -1,84 +1,82 @@
 import { strict as assert } from 'assert';
-import { Piece } from '../src/lib/Piece';
-
-const COMPARE_RANK1_LOSE = -1;
-const COMPARE_DRAW = 0;
-const COMPARE_RANK1_WIN = 1;
+import { Piece, PieceRank, GameResult } from '../src/lib/Piece';
 
 describe('Piece', function () {
   describe('#getters()', function () {
-    var piece = new Piece('r', '11');
-    assert.equal(piece.getPieceColor(), "r");
-    assert.equal(piece.getRank(), "11");
+    it('should return correct color and rank', function () {
+      var piece = new Piece('r', PieceRank.FLAG);
+      assert.equal(piece.getPieceColor(), "r");
+      assert.equal(piece.getRank(), PieceRank.FLAG);
+    });
   });
 
   describe('#bombAttacksLandmine()', function () {
     it('Bomb and landmine both disappear', function () {
-      var bombPiece = new Piece('r', '0');
-      var landminePiece = new Piece('b', '10');
+      var bombPiece = new Piece('r', PieceRank.BOMB);
+      var landminePiece = new Piece('b', PieceRank.LANDMINE);
 
       var result = bombPiece.compareRank(landminePiece);
-      assert.equal(result, COMPARE_DRAW);
+      assert.equal(result, GameResult.DRAW);
     });
   });
 
   describe('#engineerAttacksLandmine()', function () {
     it('Engineer disables landmine', function () {
-      var engineerPiece = new Piece('r', '9');
-      var landminePiece = new Piece('b', '10');
+      var engineerPiece = new Piece('r', PieceRank.ENGINEER);
+      var landminePiece = new Piece('b', PieceRank.LANDMINE);
 
       var result = engineerPiece.compareRank(landminePiece);
-      assert.equal(result, COMPARE_RANK1_WIN);
+      assert.equal(result, GameResult.WIN);
     });
   });
 
   describe('#regularUnitAttacksLandmine()', function () {
     it('Unit disappears', function () {
-      var engineerPiece = new Piece('r', '1');
-      var landminePiece = new Piece('b', '10');
+      var commanderPiece = new Piece('r', PieceRank.COMMANDER);
+      var landminePiece = new Piece('b', PieceRank.LANDMINE);
 
-      var result = engineerPiece.compareRank(landminePiece);
-      assert.equal(result, COMPARE_RANK1_LOSE);
+      var result = commanderPiece.compareRank(landminePiece);
+      assert.equal(result, GameResult.LOSE);
     });
   });
 
   describe('#weakerUnitAttacksStrongerUnit()', function () {
     it('Weaker unit loses', function () {
-      var rank5Piece = new Piece('r', '5');
-      var rank3Piece = new Piece('b', '3');
+      var rank5Piece = new Piece('r', PieceRank.COLONEL);
+      var rank3Piece = new Piece('b', PieceRank.MAJOR_GENERAL);
 
       var result = rank5Piece.compareRank(rank3Piece);
-      assert.equal(result, COMPARE_RANK1_LOSE);
+      assert.equal(result, GameResult.LOSE);
     });
   });
 
   describe('#strongerUnitAttacksWeakerUnit()', function () {
     it('Stronger unit wins', function () {
-      var rank2Piece = new Piece('r', '2');
-      var rank4Piece = new Piece('b', '4');
+      var rank2Piece = new Piece('r', PieceRank.GENERAL);
+      var rank4Piece = new Piece('b', PieceRank.BRIGADIER_GENERAL);
 
       var result = rank2Piece.compareRank(rank4Piece);
-      assert.equal(result, COMPARE_RANK1_WIN);
+      assert.equal(result, GameResult.WIN);
     });
   });
 
   describe('#unitAttacksEqualRank()', function () {
     it('Both pieces disappear', function () {
-      var rank2RedPiece = new Piece('r', '2');
-      var rank2BluePiece = new Piece('b', '2');
+      var rank2RedPiece = new Piece('r', PieceRank.GENERAL);
+      var rank2BluePiece = new Piece('b', PieceRank.GENERAL);
 
       var result = rank2RedPiece.compareRank(rank2BluePiece);
-      assert.equal(result, COMPARE_DRAW);
+      assert.equal(result, GameResult.DRAW);
     });
   });
 
   describe('#unitTakesFlag()', function () {
     it('Unit always takes flag', function () {
-      var rank2RedPiece = new Piece('r', '2');
-      var flagPiece = new Piece('b', '11');
+      var rank2RedPiece = new Piece('r', PieceRank.GENERAL);
+      var flagPiece = new Piece('b', PieceRank.FLAG);
 
       var result = rank2RedPiece.compareRank(flagPiece);
-      assert.equal(result, COMPARE_RANK1_WIN);
+      assert.equal(result, GameResult.WIN);
     });
   });
 });

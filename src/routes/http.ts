@@ -1,14 +1,22 @@
 import Express from 'express';
 import { GameStore } from '../lib/GameStore';
+import { 
+  AuthenticatedRequest, 
+  StartGameFormData, 
+  JoinGameFormData,
+  ValidatedStartGameData,
+  ValidatedJoinGameData,
+  ValidatedGameData
+} from '../types';
 
-var DB: GameStore;
+let DB: GameStore;
 
 export class HttpRoutes {
   /**
    * Validate session data for "Game" page
    * Returns valid data on success or null on failure
    */
-  validateGame(req: Express.Request) {
+  validateGame(req: AuthenticatedRequest): ValidatedGameData | null {
 
     // These must exist
     if (!req.session.gameID) {
@@ -44,7 +52,7 @@ export class HttpRoutes {
    * Validate "Start Game" form input
    * Returns valid data on success or null on failure
    */
-  validateStartGame(req: Express.Request) {
+  validateStartGame(req: Express.Request<{}, {}, StartGameFormData>): ValidatedStartGameData | null {
 
     // These must exist
     if (!req.body['player-color']) {
@@ -71,7 +79,7 @@ export class HttpRoutes {
    * Validate "Join Game" form input
    * Returns valid data on success or null on failure
    */
-  validateJoinGame(req: Express.Request) {
+  validateJoinGame(req: Express.Request<{}, {}, JoinGameFormData>): ValidatedJoinGameData | null {
 
     console.log(req.body['game-id']);
 
@@ -99,7 +107,7 @@ export class HttpRoutes {
   /**
    * Render "Home" Page
    */
-  home(req: Express.Request, res: Express.Response) {
+  home(req: AuthenticatedRequest, res: Express.Response): void {
     var listIDs = DB.list();
 
     // Welcome
@@ -109,7 +117,7 @@ export class HttpRoutes {
   /**
    * Render "Game" Page (or redirect to home page if session is invalid)
    */
-  game(req: Express.Request, res: Express.Response) {
+  game(req: AuthenticatedRequest, res: Express.Response): void {
 
     req.session.playerName = "Anonymous";
 
@@ -128,7 +136,7 @@ export class HttpRoutes {
    * Process "Start Game" form submission
    * Redirects to game page on success or home page on failure
    */
-  startGame(req: Express.Request, res: Express.Response) {
+  startGame(req: Express.Request<{}, {}, StartGameFormData>, res: Express.Response): void {
     var self = this;
 
     // Create a new session
@@ -149,9 +157,9 @@ export class HttpRoutes {
       var gameID = DB.add(validData);
 
       // Save data to session
-      req.session.gameID = gameID;
-      req.session.playerColor = validData.playerColor;
-      req.session.playerName = validData.playerName;
+      (req.session as any).gameID = gameID;
+      (req.session as any).playerColor = validData.playerColor;
+      (req.session as any).playerName = validData.playerName;
 
       // Redirect to game page
       res.redirect('/game/' + gameID);
@@ -162,7 +170,7 @@ export class HttpRoutes {
    * Process "Join Game" form submission
    * Redirects to game page on success or home page on failure
    */
-  joinGame(req: Express.Request, res: Express.Response) {
+  joinGame(req: Express.Request<{}, {}, JoinGameFormData>, res: Express.Response): void {
     var self = this;
 
     // Create a new session
@@ -190,9 +198,9 @@ export class HttpRoutes {
       var joinColor = (game.players[0].joined) ? game.players[1].color : game.players[0].color;
 
       // Save data to session
-      req.session.gameID = validData.gameID;
-      req.session.playerColor = joinColor;
-      req.session.playerName = validData.playerName;
+      (req.session as any).gameID = validData.gameID;
+      (req.session as any).playerColor = joinColor;
+      (req.session as any).playerName = validData.playerName;
 
       // Redirect to game page
       res.redirect('/game/' + validData.gameID);
@@ -202,7 +210,7 @@ export class HttpRoutes {
   /**
    * Redirect non-existent routes to the home page
    */
-  invalid(req: Express.Request, res: Express.Response) {
+  invalid(req: Express.Request, res: Express.Response): void {
     res.redirect('/');
   };
 }

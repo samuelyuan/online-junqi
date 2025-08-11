@@ -1,9 +1,7 @@
 import { BoardSquarePieceMap, BUNKER_SQUARES, HEADQUARTER_SQUARE_GROUP, HEADQUARTER_SQUARES } from './BoardConstants';
 import {
     Piece,
-    RANK_BOMB,
-    RANK_LANDMINE,
-    RANK_FLAG,
+    PieceRank,
 } from './Piece';
 
 export class BoardValidator {
@@ -21,11 +19,11 @@ export class BoardValidator {
             }
 
             var squareRowNum: number = this.getBoardSquareRow(square);
-            if (piece.getRank() === RANK_BOMB) {
+            if (piece.getRank() === PieceRank.BOMB) {
                 return this.isValidBombPosition(squareRowNum);
-            } else if (piece.getRank() == RANK_LANDMINE) {
+            } else if (piece.getRank() === PieceRank.LANDMINE) {
                 return this.isValidLandminePosition(squareRowNum);
-            } else if (piece.getRank() === RANK_FLAG) {
+            } else if (piece.getRank() === PieceRank.FLAG) {
                 // flag must be in headquarters
                 return HEADQUARTER_SQUARES.includes(square);
             }
@@ -38,11 +36,11 @@ export class BoardValidator {
     isDestinationPositionValid(pieceRank: string, current: string, destination: string): boolean {
         var destRowNum: number = this.getBoardSquareRow(destination);
         // Check if piece has restrictions
-        if (pieceRank == RANK_BOMB) {
+        if (pieceRank === PieceRank.BOMB.toString()) {
             return this.isValidBombPosition(destRowNum);
-        } else if (pieceRank == RANK_LANDMINE) {
+        } else if (pieceRank === PieceRank.LANDMINE.toString()) {
             return this.isValidLandminePosition(destRowNum);
-        } else if (pieceRank == RANK_FLAG) {
+        } else if (pieceRank === PieceRank.FLAG.toString()) {
             return this.isValidFlagPosition(current, destination);
         }
 

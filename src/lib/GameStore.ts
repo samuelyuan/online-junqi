@@ -1,12 +1,11 @@
-import { Game, PlayerSession } from './Game';
+import { Game } from './Game';
+import { PlayerSession, GameStoreInterface } from '../types';
 
-export class GameStore {
-  games: { [key: string]: Game };
+export class GameStore implements GameStoreInterface {
+  games: { [key: string]: Game } = {};
   intervalId: ReturnType<typeof setInterval>;
 
   constructor() {
-    this.games = {};
-
     // Periodically check for inactive games, and delete them
     this.intervalId = setInterval(games => {
       Object.keys(this.games).forEach(key => {
@@ -19,13 +18,13 @@ export class GameStore {
   }
 
   add(gameParams: PlayerSession): string {
-    var key = '';
-    var keyLength = 7;
-    var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let key = '';
+    const keyLength = 7;
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
     // Generate a key until we get a unique one
     do {
-      for (var i = 0; i < keyLength; i++) {
+      for (let i = 0; i < keyLength; i++) {
         key += chars.charAt(Math.floor(Math.random() * chars.length));
       };
     } while (this.games.hasOwnProperty(key))
@@ -45,12 +44,12 @@ export class GameStore {
     }
   }
 
-  find(key: string) {
+  find(key: string): Game | false {
     return (this.games.hasOwnProperty(key)) ? this.games[key] : false;
   }
 
   list(): string[] {
-    var listIDs: string[] = [];
+    const listIDs: string[] = [];
     Object.keys(this.games).forEach(key => {
       //if the room is empty, then remove it from the list
       if (
@@ -66,5 +65,3 @@ export class GameStore {
     return listIDs;
   };
 }
-
-module.exports = GameStore;

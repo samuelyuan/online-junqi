@@ -1,33 +1,13 @@
-var _ = require('underscore');
 import { Board, PlayerMove, SwapMove } from './Board';
 import { Piece } from './Piece';
+import { GameStatus, PlayerSession, PlayerStatus } from '../types';
 
 /*
  * The Game object
  */
 
-const STATUS_PENDING = "pending";
-const STATUS_ONGOING = "ongoing";
-const STATUS_FORFEIT = "forfeit";
-
-export interface PlayerSession {
-    playerColor: string;
-    playerName: string;
-}
-
-interface PlayerStatus {
-    color: string | null;
-    name: string | null;
-    joined: boolean;
-    isSetup: boolean;
-    inCheck: boolean;
-    hasCommander: boolean;
-    hasMoveablePieces: boolean;
-    forfeited: boolean;
-}
-
 export class Game {
-    status: string;
+    status: GameStatus;
     activePlayer: PlayerStatus | null;
     players: PlayerStatus[];
     board: Board;
@@ -43,7 +23,7 @@ export class Game {
      */
     constructor(params: PlayerSession) {
         // pending/ongoing/defeat/forfeit
-        this.status = STATUS_PENDING;
+        this.status = GameStatus.PENDING;
 
         this.activePlayer = null;
 
@@ -87,7 +67,7 @@ export class Game {
      */
     addPlayer(playerData: PlayerSession): boolean {
         // Check for an open spot
-        var p = _.findWhere(this.players, { color: playerData.playerColor, joined: false });
+        const p = this.players.find(player => player.color === playerData.playerColor && !player.joined);
         if (!p) { return false; }
 
         // Set player info
@@ -105,8 +85,11 @@ export class Game {
      */
     removePlayer(playerData: PlayerSession): boolean {
         // Find player in question
-        var p = _.findWhere(this.players, { color: playerData.playerColor });
+        const p = this.players.find(player => player.color === playerData.playerColor);
         if (!p) { return false; }
+
+        // Check if player is actually joined
+        if (!p.joined) { return false; }
 
         // Set player info
         p.joined = false;
@@ -122,8 +105,11 @@ export class Game {
     finishSetup(playerData: PlayerSession): boolean {
         const DEFAULT_PLAYER_COLOR = 'blue';
         // Find player in question
-        var p = _.findWhere(this.players, { color: playerData.playerColor });
+        const p = this.players.find(player => player.color === playerData.playerColor);
         if (!p) { return false; }
+
+        // Check if player is actually joined
+        if (!p.joined) { return false; }
 
         // Set player info
         p.isSetup = true;
@@ -134,13 +120,13 @@ export class Game {
             this.players[0].isSetup &&
             this.players[1].joined &&
             this.players[1].isSetup &&
-            this.status === STATUS_PENDING
+            this.status === GameStatus.PENDING
         ) {
-            this.activePlayer = _.findWhere(this.players, { color: DEFAULT_PLAYER_COLOR });
+            this.activePlayer = this.players.find(player => player.color === DEFAULT_PLAYER_COLOR) || null;
             // Generate valid moves based on latest board configuration
             this.validMoves = this.board.getMovesForPlayer(DEFAULT_PLAYER_COLOR);
             this.validSwap = [];
-            this.status = STATUS_ONGOING;
+            this.status = GameStatus.ONGOING;
         }
 
         this.modifiedOn = Date.now();
@@ -149,13 +135,15 @@ export class Game {
     }
 
     swapPieces(moveString: string): boolean {
-        var validSwap = _.findWhere(this.validSwap, this.parseMoveString(moveString));
+        const validSwap = this.validSwap.find(swap => 
+            JSON.stringify(swap) === JSON.stringify(this.parseMoveString(moveString))
+        );
 
         if (!validSwap) {
             return false;
         }
 
-        var validMove = validSwap;
+        const validMove = validSwap;
         this.board.swapPieces(validMove.startSquare, validMove.endSquare);
 
         // recalculate
@@ -166,9 +154,9 @@ export class Game {
     evaluateMoveAndModifyBoard(validMove: PlayerMove): boolean {
         // Evaluation is only required for attacks
         // since each unit's rank is hidden from the other player
-        var evaluatedMove = validMove;
+        let evaluatedMove = validMove;
         if (validMove.type === "attack") {
-            var updatedEvaluatedMove = this.board.evaluateMove(validMove.startSquare, validMove.endSquare);
+            const updatedEvaluatedMove = this.board.evaluateMove(validMove.startSquare, validMove.endSquare);
             if (!updatedEvaluatedMove) {
                 return false;
             }
@@ -176,7 +164,7 @@ export class Game {
         }
 
         // Apply move
-        var selectedPiece: Piece = this.board.getPieceAtSquare(evaluatedMove.startSquare)!;
+        const selectedPiece: Piece = this.board.getPieceAtSquare(evaluatedMove.startSquare)!;
         switch (evaluatedMove.type) {
             case 'move':
                 this.board.placePieceAtSquare(evaluatedMove.endSquare, selectedPiece);
@@ -212,7 +200,7 @@ export class Game {
      * Returns true on success and false on failure.
      */
     move(moveString: string): boolean {
-        if (this.status === STATUS_PENDING) {
+        if (this.status === GameStatus.PENDING) {
             return this.swapPieces(moveString);
         }
 
@@ -220,12 +208,14 @@ export class Game {
         this.validSwap = [];
 
         // Test if move is valid
-        var validMove = _.findWhere(this.validMoves, this.parseMoveString(moveString));
+        const validMove = this.validMoves.find(move => 
+            JSON.stringify(move) === JSON.stringify(this.parseMoveString(moveString))
+        );
         if (!validMove) {
             return false;
         }
 
-        var moveMade = this.evaluateMoveAndModifyBoard(validMove!);
+        const moveMade = this.evaluateMoveAndModifyBoard(validMove!);
         if (!moveMade) {
             return false;
         }
@@ -234,34 +224,36 @@ export class Game {
         this.lastMove = validMove;
 
         // Get inactive player
-        var inactivePlayer = _.find(this.players, (p: PlayerStatus) => {
-            return (p === this.activePlayer) ? false : true;
-        }, this);
+        const inactivePlayer = this.players.find(p => p !== this.activePlayer);
 
         // Regenerate valid moves
-        this.validMoves = this.board.getMovesForPlayer(inactivePlayer.color);
+        if (inactivePlayer && inactivePlayer.color) {
+            this.validMoves = this.board.getMovesForPlayer(inactivePlayer.color);
+        }
 
         // Set check status for both players
-        _.each(this.players, (p: PlayerStatus) => {
-            p.inCheck = this.board.isPlayerFlagCaptured(p.color!);
-            p.hasCommander = this.board.isCommanderAlive(p.color!);
-        }, this);
+        this.players.forEach((p: PlayerStatus) => {
+            if (p.color) {
+                p.inCheck = this.board.isPlayerFlagCaptured(p.color);
+                p.hasCommander = this.board.isCommanderAlive(p.color);
+            }
+        });
 
         // Test for checkmate or stalemate
-        if (this.validMoves.length === 0) {
+        if (inactivePlayer && this.validMoves.length === 0) {
             inactivePlayer.hasMoveablePieces = false;
         }
 
-        if (inactivePlayer.inCheck) {
-            this.status = 'checkmate';
+        if (inactivePlayer && inactivePlayer.inCheck) {
+            this.status = GameStatus.CHECKMATE;
         }
 
-        if (inactivePlayer.hasMoveablePieces === false) {
-            this.status = 'nopieces';
+        if (inactivePlayer && inactivePlayer.hasMoveablePieces === false) {
+            this.status = GameStatus.NO_PIECES;
         }
 
         // Toggle active player
-        if (this.status === STATUS_ONGOING) {
+        if (this.status === GameStatus.ONGOING && inactivePlayer) {
             this.activePlayer = inactivePlayer;
         }
 
@@ -276,14 +268,17 @@ export class Game {
      */
     forfeit(playerData: PlayerSession): boolean {
         // Find player in question
-        var p: PlayerStatus = _.findWhere(this.players, { color: playerData.playerColor });
+        const p: PlayerStatus = this.players.find(player => player.color === playerData.playerColor)!;
         if (!p) { return false; }
+
+        // Check if player is actually joined
+        if (!p.joined) { return false; }
 
         // Set player info
         p.forfeited = true;
 
         // Set game status
-        this.status = STATUS_FORFEIT;
+        this.status = GameStatus.FORFEIT;
 
         this.modifiedOn = Date.now();
 
@@ -296,11 +291,11 @@ export class Game {
      */
     parseMoveString(moveString: string): PlayerMove | null {
         // format: "<startSquare> <command> <endSquare>"
-        var moveStrArr = moveString.split(" ");
+        const moveStrArr = moveString.split(" ");
 
-        var startSquare = moveStrArr[0];
-        var command = moveStrArr[1];
-        var endSquare = moveStrArr[2];
+        const startSquare = moveStrArr[0];
+        const command = moveStrArr[1];
+        const endSquare = moveStrArr[2];
 
         // Move to empty square
         if (command === '-') {

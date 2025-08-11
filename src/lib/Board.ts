@@ -3,9 +3,7 @@ import { BoardGenerator } from './BoardGenerator';
 import { BoardValidator } from './BoardValidator';
 import {
   Piece,
-  RANK_COMMANDER,
-  RANK_ENGINEER,
-  RANK_FLAG,
+  PieceRank,
 } from './Piece';
 import { RailroadNetwork } from './RailroadNetwork';
 
@@ -31,11 +29,11 @@ export class Board {
   Create new board to store pieces
   */
   constructor() {
-    var boardGenerator = new BoardGenerator();
+    const boardGenerator = new BoardGenerator();
     this.boardState = boardGenerator.generateBoard();
 
     this.boardValidator = new BoardValidator();
-    var valid: boolean = this.boardValidator.validateBoard(this.boardState);
+    const valid: boolean = this.boardValidator.validateBoard(this.boardState);
     if (!valid) {
       throw new Error("Invalid board state");
     }
@@ -48,9 +46,13 @@ export class Board {
    * Returns an array of move objects on success or an empty array on failure.
    */
   getMovesForPlayer(playerColor: string): PlayerMove[] {
-    var playerSquares: string[] = this.getAllPlayerSquares(this.boardState, playerColor);
+    if (!playerColor || typeof playerColor !== 'string') {
+      throw new Error('Player color must be a non-empty string');
+    }
+    
+    const playerSquares: string[] = this.getAllPlayerSquares(this.boardState, playerColor);
     return playerSquares
-      .filter((square) => this.boardState[square]!.isMovable())
+      .filter((square) => this.boardState[square]?.isMovable())
       .map((square) => this.getValidMoves(square, this.boardState))
       .flat();
   };
@@ -69,18 +71,38 @@ export class Board {
    * Swaps pieces on startSquare and endSqaure. Assumes both squares have pieces.
    */
   swapPieces(startSquare: string, endSquare: string): void {
-    var startPiece = this.boardState[startSquare];
-    var endPiece = this.boardState[endSquare];
+    if (!startSquare || !endSquare) {
+      throw new Error('Both start and end squares must be provided');
+    }
+    
+    if (!this.boardState[startSquare] || !this.boardState[endSquare]) {
+      throw new Error('Both squares must contain pieces to swap');
+    }
+    
+    const startPiece = this.boardState[startSquare];
+    const endPiece = this.boardState[endSquare];
 
     this.boardState[startSquare] = endPiece;
     this.boardState[endSquare] = startPiece;
   }
 
   getPieceAtSquare(currentSquare: string): Piece | null {
-    return this.boardState[currentSquare];
+    if (!currentSquare || typeof currentSquare !== 'string') {
+      throw new Error('Square location must be a non-empty string');
+    }
+    
+    return this.boardState[currentSquare] || null;
   }
 
   placePieceAtSquare(currentSquare: string, piece: Piece): void {
+    if (!currentSquare || typeof currentSquare !== 'string') {
+      throw new Error('Square location must be a non-empty string');
+    }
+    
+    if (!piece || !(piece instanceof Piece)) {
+      throw new Error('Piece must be a valid Piece instance');
+    }
+    
     this.boardState[currentSquare] = piece;
   }
 
@@ -88,6 +110,10 @@ export class Board {
    * Clear this square
    */
   setSquareEmpty(squareLocation: string): void {
+    if (!squareLocation || typeof squareLocation !== 'string') {
+      throw new Error('Square location must be a non-empty string');
+    }
+    
     this.boardState[squareLocation] = null;
   }
 
@@ -95,34 +121,34 @@ export class Board {
    * Determine if a player's flag is captured or not
    */
   isPlayerFlagCaptured(playerColor: string): boolean {
-    return !this.doesPieceExist(this.boardState, playerColor, RANK_FLAG);
+    return !this.doesPieceExist(this.boardState, playerColor, PieceRank.FLAG);
   };
 
   /**
    * Determine if a player still has the commander (rank 1). If not, then reveal the flag
    */
   isCommanderAlive(playerColor: string): boolean {
-    return this.doesPieceExist(this.boardState, playerColor, RANK_COMMANDER);
+    return this.doesPieceExist(this.boardState, playerColor, PieceRank.COMMANDER);
   };
 
-  doesPieceExist(boardState: { [key: string]: Piece | null }, playerColor: string, pieceRank: string): boolean {
-    var playerSquares = this.getAllPlayerSquares(boardState, playerColor);
-    return playerSquares.some((square) => boardState[square]!.getRank() == pieceRank);
+  doesPieceExist(boardState: { [key: string]: Piece | null }, playerColor: string, pieceRank: PieceRank): boolean {
+    const playerSquares = this.getAllPlayerSquares(boardState, playerColor);
+    return playerSquares.some((square) => boardState[square]!.getRank() === pieceRank);
   }
 
   // Evaluate an attack from startSquare to destination
   // Assumes both locations have pieces
   evaluateMove(startSquare: string, destination: string): PlayerMove | null {
-    var board = this.boardState;
+    const board = this.boardState;
     // One or more squares is missing pieces
     if (board[startSquare] == null || board[destination] == null) {
       return null;
     }
-    var playerPiece = board[startSquare]!;
-    var enemyPiece = board[destination]!;
-    var compareResult: number = playerPiece.compareRank(enemyPiece);
+    const playerPiece = board[startSquare]!;
+    const enemyPiece = board[destination]!;
+    const compareResult: number = playerPiece.compareRank(enemyPiece);
 
-    var compareResultStringMap = new Map();
+    const compareResultStringMap = new Map();
     compareResultStringMap.set(1, 'capture'); // greater rank
     compareResultStringMap.set(0, 'equal'); // equal rank
     compareResultStringMap.set(-1, 'dies'); // lower rank
@@ -143,10 +169,10 @@ export class Board {
    * Returns an array of move objects on success or an empty array on failure.
    */
   getValidMoves(square: string, board: BoardSquarePieceMap): PlayerMove[] {
-    var piece = board[square]!;
-    var isPieceEngineer = (piece.getRank() === RANK_ENGINEER);
-    var reachableSquares = this.railroadNetwork.getReachableSquares(square, isPieceEngineer, board);
-    var self = this;
+    const piece = board[square]!;
+    const isPieceEngineer = (piece.getRank() === PieceRank.ENGINEER);
+    const reachableSquares = this.railroadNetwork.getReachableSquares(square, isPieceEngineer, board);
+    const self = this;
     return Array.from(reachableSquares)
       .filter((destination) => square != destination) // skip itself
       .map(function (destination) {
@@ -170,10 +196,10 @@ export class Board {
     3. Bomb cannot be in the front row
   */
   getSwapMoves(square: string, board: BoardSquarePieceMap): SwapMove[] {
-    var piece: Piece = board[square]!;
+    const piece: Piece = board[square]!;
     return this.getAllPlayerSquares(board, piece.getPieceColor())
       .filter((destination) => square !== destination) // skip itself
-      .filter((destination) => this.boardValidator.isDestinationPositionValid(piece.getRank(), square, destination))
+      .filter((destination) => this.boardValidator.isDestinationPositionValid(piece.getRankString(), square, destination))
       .map((destination) => ({
         type: 'swap',
         startSquare: square,

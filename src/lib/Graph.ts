@@ -26,7 +26,7 @@ export class Graph {
   neighborMap: { [key: string]: Set<string> };
 
   constructor() {
-    var graphNodesEdges = this.initializeGraph();
+    const graphNodesEdges = this.initializeGraph();
 
     this.nodes = graphNodesEdges.nodes;
     this.neighborMap = graphNodesEdges.neighborMap;
@@ -37,8 +37,8 @@ export class Graph {
   }
 
   initializeGraph() {
-    var nodes = this.initializeNodes();
-    var neighborMap = this.initializeEdges(nodes);
+    const nodes = this.initializeNodes();
+    const neighborMap = this.initializeEdges(nodes);
 
     return {
       nodes: nodes,
@@ -47,11 +47,11 @@ export class Graph {
   }
 
   initializeNodes(): string[] {
-    var allNodes: string[] = [];
+    const allNodes: string[] = [];
     const columnList: string[] = ['a', 'b', 'c', 'd', 'e'];
     columnList.forEach(function(columnChar) {
-      for (var row = 1; row <= 12; row++) {
-        var nodeKey = columnChar + row;
+      for (let row = 1; row <= 12; row++) {
+        const nodeKey = columnChar + row;
         allNodes.push(nodeKey);
       }
     });
@@ -60,7 +60,7 @@ export class Graph {
   }
 
   initializeEdges(nodes: string[]): { [key: string]: Set<string> } {
-    var neighborMap: { [key: string]: Set<string> } = {};
+    const neighborMap: { [key: string]: Set<string> } = {};
 
     nodes.forEach(currentSquare => {
       // Exclude front row because the neighbor could end up in the opponent's side
@@ -123,12 +123,12 @@ export class Graph {
    */
   transformSquare(square: string, transform: TransformOffset): string | null {
     // Parse square
-    var file = square[0];
-    var rank = parseInt(square.substring(1, square.length), 10);
+    const file = square[0];
+    const rank = parseInt(square.substring(1, square.length), 10);
 
     // Apply transform
-    var destFile = alpha2num(file) + transform.x;
-    var destRank = rank + transform.y;
+    const destFile = alpha2num(file) + transform.x;
+    const destRank = rank + transform.y;
 
     // Check boundaries
     if (destFile < 1 || destFile > 5) { return null; }

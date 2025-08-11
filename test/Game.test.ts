@@ -1,5 +1,6 @@
 import { strict as assert } from 'assert';
 import { Game } from '../src/lib/Game';
+import { PlayerSession } from '../src/types';
 
 describe('Game', function () {
   describe('#parseMoveString()', function () {
@@ -47,13 +48,13 @@ describe('Game', function () {
       playerName: '',
       playerColor: 'red'
     });
-    var redPlayerSession = {
+    var redPlayerSession: PlayerSession = {
       playerName: '',
-      playerColor: 'red',
+      playerColor: 'red' as const,
     };
-    var bluePlayerSession = {
+    var bluePlayerSession: PlayerSession = {
       playerName: '',
-      playerColor: 'blue',
+      playerColor: 'blue' as const,
     };
 
     it('Join game twice as same color', function () {
@@ -76,13 +77,13 @@ describe('Game', function () {
       playerName: '',
       playerColor: 'red'
     });
-    var redPlayerSession = {
+    var redPlayerSession: PlayerSession = {
       playerName: '',
-      playerColor: 'red',
+      playerColor: 'red' as const,
     };
-    var unknownPlayerSession = {
+    var bluePlayerNotJoined: PlayerSession = {
       playerName: '',
-      playerColor: 'unknown',
+      playerColor: 'blue' as const,
     };
 
     it('Join and leave game', function () {
@@ -98,11 +99,9 @@ describe('Game', function () {
       assert.equal(gameRedSide.players[0].joined, false);
     });
 
-    it('Unknown player leaves game', function () {
-      // Unknown player
-      var status = gameRedSide.addPlayer(unknownPlayerSession);
-      assert.equal(status, false);
-      var status = gameRedSide.removePlayer(unknownPlayerSession);
+    it('Player who has not joined cannot be removed', function () {
+      // Try to remove a player who hasn't joined yet
+      var status = gameRedSide.removePlayer(bluePlayerNotJoined);
       assert.equal(status, false);
     })
   });
@@ -129,13 +128,13 @@ describe('Game', function () {
       playerName: '',
       playerColor: 'red'
     });
-    var redPlayerSession = {
+    var redPlayerSession: PlayerSession = {
       playerName: '',
-      playerColor: 'red',
+      playerColor: 'red' as const,
     };
-    var bluePlayerSession = {
+    var bluePlayerSession: PlayerSession = {
       playerName: '',
-      playerColor: 'blue',
+      playerColor: 'blue' as const,
     }
     var status = gameRedSide.addPlayer(redPlayerSession);
     var status = gameRedSide.addPlayer(bluePlayerSession);
@@ -151,10 +150,17 @@ describe('Game', function () {
       assert.equal(gameRedSide.status, "ongoing");
     });
 
-    it('Unknown player finishes setup', function () {
-      var status = gameRedSide.finishSetup({
+    it('Player who has not joined cannot finish setup', function () {
+      // Create a fresh game instance for this test
+      var freshGame = new Game({
         playerName: '',
-        playerColor: 'unknown'
+        playerColor: 'red'
+      });
+      
+      // Try to finish setup for a player who hasn't joined yet
+      var status = freshGame.finishSetup({
+        playerName: 'Player Not Joined',
+        playerColor: 'blue' as const
       });
       assert.equal(status, false);
     })
@@ -165,13 +171,13 @@ describe('Game', function () {
       playerName: '',
       playerColor: 'red'
     });
-    var redPlayerSession = {
+    var redPlayerSession: PlayerSession = {
       playerName: '',
-      playerColor: 'red',
+      playerColor: 'red' as const,
     };
-    var bluePlayerSession = {
+    var bluePlayerSession: PlayerSession = {
       playerName: '',
-      playerColor: 'blue',
+      playerColor: 'blue' as const,
     }
     gameRedSide.addPlayer(redPlayerSession);
     gameRedSide.addPlayer(bluePlayerSession);
@@ -190,12 +196,16 @@ describe('Game', function () {
       playerName: '',
       playerColor: 'red'
     });
-    var redPlayerSession = {
+    var redPlayerSession: PlayerSession = {
       playerName: '',
-      playerColor: 'red',
+      playerColor: 'red' as const,
     };
 
     it('Red player forfeits game', function () {
+      // First add the red player to the game
+      var addStatus = gameRedSide.addPlayer(redPlayerSession);
+      assert.equal(addStatus, true);
+      
       assert.equal(gameRedSide.players[0].forfeited, false);
 
       var status = gameRedSide.forfeit(redPlayerSession);
@@ -203,10 +213,17 @@ describe('Game', function () {
       assert.equal(gameRedSide.players[0].forfeited, true);
     });
 
-    it('Unknown player forfeits game', function () {
-      var status = gameRedSide.forfeit({
+    it('Player who has not joined cannot forfeit', function () {
+      // Create a fresh game instance for this test
+      var freshGame = new Game({
         playerName: '',
-        playerColor: 'unknown',
+        playerColor: 'red'
+      });
+      
+      // Try to forfeit for a player who hasn't joined yet
+      var status = freshGame.forfeit({
+        playerName: 'Player Not Joined',
+        playerColor: 'blue' as const,
       });
       assert.equal(status, false);
     });

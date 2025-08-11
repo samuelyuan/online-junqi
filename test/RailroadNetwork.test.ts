@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { Piece } from '../src/lib/Piece';
+import { Piece, PieceRank } from '../src/lib/Piece';
 import { RailroadNetwork } from '../src/lib/RailroadNetwork';
 
 describe('RailroadNetwork', function () {
@@ -10,8 +10,8 @@ describe('RailroadNetwork', function () {
   describe('#getReachableSquaresEngineer()', function () {
     it('Get reachable squares', function () {
       var currentSquare = "e2"
-      var boardState = {"e2": new Piece("r", "9"), "d2": null, "c2": null, "b2": null,
-       "a2": null, "a3": null, "a4": null, "a5": new Piece("_", "_"), "a6": null};
+      var boardState = {"e2": new Piece("r", PieceRank.ENGINEER), "d2": null, "c2": null, "b2": null,
+       "a2": null, "a3": null, "a4": null, "a5": new Piece("_", PieceRank.FLAG), "a6": null};
       var isPieceEngineer = true;
 
       var reachableSquares = railroadNetwork.getReachableSquares(currentSquare, isPieceEngineer, boardState);
@@ -30,8 +30,8 @@ describe('RailroadNetwork', function () {
   describe('#getReachableSquaresNotEngineer()', function () {
     it('Get reachable squares', function () {
       var currentSquare = "e2"
-      var boardState = {"e2": new Piece("r", "9"), "d2": null, "c2": null, "b2": null,
-       "a2": null, "a3": null, "a4": null, "a5": new Piece("_", "_"), "a6": null};
+      var boardState = {"e2": new Piece("r", PieceRank.ENGINEER), "d2": null, "c2": null, "b2": null,
+       "a2": null, "a3": null, "a4": null, "a5": new Piece("_", PieceRank.FLAG), "a6": null};
       var isPieceEngineer = false;
 
       var reachableSquares = railroadNetwork.getReachableSquares(currentSquare, isPieceEngineer, boardState);
