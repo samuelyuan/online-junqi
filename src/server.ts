@@ -103,6 +103,22 @@ io.sockets.on('disconnect', function (socket) {
     const game = DB.find(sess.gameID);
     if (game) {
       game.removePlayer(sess);
+      
+      // Send filtered updates to remaining players using the socket routes helper
+      // We need to get all remaining sockets in the game room and send filtered updates
+      const room = io.sockets.adapter.rooms.get(sess.gameID);
+      if (room) {
+        room.forEach(socketId => {
+          const remainingSocket = io.sockets.sockets.get(socketId);
+          if (remainingSocket && remainingSocket.id !== socket.id) {
+            const remainingSession = (remainingSocket.handshake as any).session as SessionData;
+            if (remainingSession && remainingSession.playerColor) {
+              // Send filtered state for this specific player
+              remainingSocket.emit('update', game.getState(remainingSession.playerColor));
+            }
+          }
+        });
+      }
     }
   }
 });

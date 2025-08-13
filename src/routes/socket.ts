@@ -14,6 +14,27 @@ function getSession(socket: Socket): SessionData {
   return (socket.handshake as any).session as SessionData;
 }
 
+// Helper function to send filtered updates to all players in a game
+function sendFilteredUpdatesToGame(gameID: string, game: Game) {
+  if (!IO) return;
+  
+  // Get all sockets in this game room
+  const room = IO.sockets.adapter.rooms.get(gameID);
+  if (!room) return;
+  
+  // Send individual filtered updates to each player
+  room.forEach(socketId => {
+    const socket = IO!.sockets.sockets.get(socketId);
+    if (socket) {
+      const session = (socket.handshake as any).session as SessionData;
+      if (session && session.playerColor) {
+        // Send filtered state for this specific player
+        socket.emit('update', game.getState(session.playerColor));
+      }
+    }
+  });
+}
+
 let IO: Server | null = null;
 let DB: GameStore | null = null;
 
@@ -57,8 +78,8 @@ const join = function (this: Socket, gameID: string) {
   // Add user to a socket.io "room" that matches the game ID
   this.join(gameID);
 
-  // Emit the update event to everyone in this room/game
-  IO?.sockets.in(gameID).emit('update', game);
+  // Send filtered updates to all players in the game
+  sendFilteredUpdatesToGame(gameID, game);
 
   console.log(sess.playerName + ' joined ' + gameID);
 };
@@ -98,8 +119,8 @@ const finishSetup = function (this: Socket, gameID: string) {
     return;
   }
 
-  // Emit the update event to everyone in this room/game
-  IO?.sockets.in(gameID).emit('update', game);
+  // Send filtered updates to all players in the game
+  sendFilteredUpdatesToGame(gameID, game);
 
   console.log(sess.playerName + ' finish setup in game ' + gameID);
 };
@@ -141,8 +162,8 @@ const move = function (this: Socket, data: MoveData) {
     return;
   }
 
-  // Emit the update event to everyone in this room/game
-  IO?.sockets.in(data.gameID).emit('update', game);
+  // Send filtered updates to all players in the game
+  sendFilteredUpdatesToGame(data.gameID, game);
 
   console.log(data.gameID + ' ' + sess.playerName + ': ' + data.move);
 };
@@ -183,8 +204,8 @@ const forfeit = function (this: Socket, gameID: string) {
     return;
   }
 
-  // Emit the update event to everyone in this room/game
-  IO?.sockets.in(gameID).emit('update', game);
+  // Send filtered updates to all players in the game
+  sendFilteredUpdatesToGame(gameID, game);
 
   console.log(gameID + ' ' + sess.playerName + ': Forfeit');
 };

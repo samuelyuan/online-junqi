@@ -62,6 +62,65 @@ export class Game {
     }
 
     /**
+     * Get the current game state as a plain object for data transfer
+     * @param playerColor - The color of the player requesting the state (for filtering)
+     */
+    getState(playerColor?: string) {
+        const baseState: any = {
+            status: this.status,
+            activePlayer: this.activePlayer,
+            players: this.players,
+            capturedPieces: playerColor ? 
+                this.capturedPieces.filter(p => p.colorChar === playerColor) : 
+                this.capturedPieces,
+            validMoves: this.validMoves,
+            validSwap: this.validSwap,
+            lastMove: this.lastMove,
+            modifiedOn: this.modifiedOn,
+            colorMap: this.colorMap
+        };
+
+        if (playerColor) {
+            // Filter board to only show what this player should see
+            baseState.board = this.getFilteredBoardState(playerColor);
+        } else {
+            // For admin/spectator view - show everything
+            baseState.board = this.board.boardState;
+        }
+
+        return baseState;
+    }
+
+    /**
+     * Get filtered board state for a specific player
+     * Hides opponent piece ranks to maintain game security
+     */
+    private getFilteredBoardState(playerColor: string) {
+        const filteredState: any = {};
+        
+        Object.keys(this.board.boardState).forEach(square => {
+            const piece = this.board.boardState[square];
+            if (!piece) {
+                filteredState[square] = null; // Empty square
+            } else if (piece.colorChar === playerColor) {
+                // Own piece - show full information
+                filteredState[square] = {
+                    colorChar: piece.colorChar,
+                    rank: piece.rank
+                };
+            } else {
+                // Opponent piece - hide the rank for security!
+                filteredState[square] = {
+                    colorChar: piece.colorChar,
+                    rank: 'hidden' // Don't expose actual rank!
+                };
+            }
+        });
+        
+        return filteredState;
+    }
+
+    /**
      * Add player to game, and after both players have joined activate the game.
      * Returns true on success and false on failure.
      */
@@ -80,8 +139,7 @@ export class Game {
     }
 
     /**
-     * Remove player from game, this does not end the game, players may come and go as they please.
-     * Returns true on success and false on failure.
+     * Remove player from game
      */
     removePlayer(playerData: PlayerSession): boolean {
         // Find player in question
@@ -93,11 +151,12 @@ export class Game {
 
         // Set player info
         p.joined = false;
+        p.name = null;
 
         this.modifiedOn = Date.now();
 
         return true;
-    };
+    }
 
     /*
     Finalize the setup
@@ -134,20 +193,30 @@ export class Game {
         return true;
     }
 
+    /**
+     * Swap pieces during setup phase
+     */
     swapPieces(moveString: string): boolean {
+        // Test if swap is valid
         const validSwap = this.validSwap.find(swap => 
             JSON.stringify(swap) === JSON.stringify(this.parseMoveString(moveString))
         );
-
         if (!validSwap) {
             return false;
         }
 
-        const validMove = validSwap;
-        this.board.swapPieces(validMove.startSquare, validMove.endSquare);
+        // Apply swap
+        const piece1: Piece = this.board.getPieceAtSquare(validSwap.startSquare)!;
+        const piece2: Piece = this.board.getPieceAtSquare(validSwap.endSquare)!;
 
-        // recalculate
+        this.board.placePieceAtSquare(validSwap.startSquare, piece2);
+        this.board.placePieceAtSquare(validSwap.endSquare, piece1);
+
+        // Regenerate valid swaps
         this.validSwap = this.board.getSwapForAll();
+
+        this.modifiedOn = Date.now();
+
         return true;
     }
 
@@ -263,12 +332,11 @@ export class Game {
     }
 
     /**
-     * Apply a player's forfeit to the game.
-     * Returns true on success and false on failure.
+     * Forfeit the game
      */
     forfeit(playerData: PlayerSession): boolean {
         // Find player in question
-        const p: PlayerStatus = this.players.find(player => player.color === playerData.playerColor)!;
+        const p = this.players.find(player => player.color === playerData.playerColor);
         if (!p) { return false; }
 
         // Check if player is actually joined
