@@ -109,7 +109,7 @@
   },
 
   "include": [
-    "src/**/*",
-    "test/**/*"
+    "src/**/*.ts",
+    "types/**/*.d.ts"
   ]
 }

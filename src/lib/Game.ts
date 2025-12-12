@@ -1,5 +1,5 @@
 import { Board, PlayerMove, SwapMove } from './Board';
-import { Piece } from './Piece';
+import { Piece, PieceRank } from './Piece';
 import { GameStatus, PlayerSession, PlayerStatus } from '../types';
 
 /*
@@ -70,8 +70,8 @@ export class Game {
             status: this.status,
             activePlayer: this.activePlayer,
             players: this.players,
-            capturedPieces: playerColor ? 
-                this.capturedPieces.filter(p => p.colorChar === playerColor) : 
+            capturedPieces: playerColor ?
+                this.capturedPieces.filter(p => p.colorChar === playerColor) :
                 this.capturedPieces,
             validMoves: this.validMoves,
             validSwap: this.validSwap,
@@ -102,7 +102,7 @@ export class Game {
             const piece = this.board.boardState[square];
             if (!piece) {
                 filteredState[square] = null; // Empty square
-            } else if (piece.colorChar === playerColor) {
+            } else if (piece.colorChar === playerColor[0]) {
                 // Own piece - show full information
                 filteredState[square] = {
                     colorChar: piece.colorChar,
@@ -110,13 +110,27 @@ export class Game {
                 };
             } else {
                 // Opponent piece - hide the rank for security!
-                filteredState[square] = {
-                    colorChar: piece.colorChar,
-                    rank: 'hidden' // Don't expose actual rank!
-                };
+
+                // Find opponent player
+                const opponentIndex = this.colorMap[piece.colorChar];
+                const opponent = this.players[opponentIndex];
+
+                // Exception: reveal enemy flag if commander is dead
+                const shouldRevealFlag = piece.getRank() === PieceRank.FLAG && opponent && !opponent.hasCommander;
+
+                if (shouldRevealFlag) {
+                    filteredState[square] = {
+                        colorChar: piece.colorChar,
+                        rank: piece.rank
+                    };
+                } else {
+                    filteredState[square] = {
+                        colorChar: piece.colorChar,
+                        rank: 'hidden' // Don't expose actual rank!
+                    };
+                }
             }
         });
-        
         return filteredState;
     }
 
@@ -198,7 +212,7 @@ export class Game {
      */
     swapPieces(moveString: string): boolean {
         // Test if swap is valid
-        const validSwap = this.validSwap.find(swap => 
+        const validSwap = this.validSwap.find(swap =>
             JSON.stringify(swap) === JSON.stringify(this.parseMoveString(moveString))
         );
         if (!validSwap) {
@@ -277,7 +291,7 @@ export class Game {
         this.validSwap = [];
 
         // Test if move is valid
-        const validMove = this.validMoves.find(move => 
+        const validMove = this.validMoves.find(move =>
             JSON.stringify(move) === JSON.stringify(this.parseMoveString(moveString))
         );
         if (!validMove) {

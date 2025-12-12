@@ -42,13 +42,13 @@ export class ClientBoard {
         return '';
       }
 
-      //Display flag when commander dies
-      if (pieceRank === RANK_FLAG && !gameState.players[pieceOwner].hasCommander) {
-        return `${colorClassName} rank${RANK_FLAG}`;
+      // If rank is hidden, show facedown
+      if (!pieceRank || pieceRank === 'hidden') {
+        return `facedown ${colorClassName}`;
       }
 
-      //Never display any other piece's rank
-      return `facedown ${colorClassName}`;
+      // Rank is revealed
+      return `${colorClassName} rank${pieceRank}`;
     }
 
     return `${colorClassName} rank${pieceRank}`;

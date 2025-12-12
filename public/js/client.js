@@ -1,7 +1,7 @@
 import { BoardHighlighter } from "./lib/boardhighlighter.js";
 import { ClientBoard } from "./lib/clientboard.js";
-import SocketManager from './lib/socketmanager.js';
-import GameUIManager from './lib/gameuimanager.js';
+import SocketManager from './lib/SocketManager.js';
+import GameUIManager from './lib/GameUIManager.js';
 
 var Client = (function (window) {
 
@@ -174,7 +174,7 @@ var Client = (function (window) {
         uiManager.updatePlayerPanels(gameState.players, activeColor, gameState.status);
 
         // Update board
-        uiManager.renderBoard(gameState.board.boardState, playerColor, gameState, clientBoard, gameClasses);
+        uiManager.renderBoard(gameState.board, playerColor, gameState, clientBoard, gameClasses);
 
         // Highlight last move
         uiManager.highlightLastMove(gameState.lastMove);

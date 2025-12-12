@@ -148,7 +148,7 @@ class GameUIManager {
     renderBoard(boardState, playerColor, gameState, clientBoard, gameClasses) {
         for (const sq in boardState) {
             const piece = boardState[sq];
-            const pieceStr = piece == null ? null : (piece.colorChar + piece.rankStr);
+            const pieceStr = piece == null ? null : (piece.colorChar + piece.rank.toString());
             const pieceClass = clientBoard.getPieceClasses(pieceStr, playerColor, gameState);
             this.getElement(sq).removeClass(gameClasses).addClass(pieceClass);
         }

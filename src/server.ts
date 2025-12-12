@@ -5,7 +5,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import * as httpRoutes from './routes/http';
 import bodyParser from 'body-parser';
-import cookie from 'cookie';
+import * as cookie from 'cookie';
 import errorHandler from 'errorhandler';
 import logger from 'morgan';
 import methodOverride from 'method-override';
