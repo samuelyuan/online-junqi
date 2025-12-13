@@ -1,36 +1,35 @@
-// Constants
-const GAME_OVER_TYPES = {
-    'checkmate-win': ['alert-success', 'Captured Flag'],
-    'checkmate-lose': ['alert-danger', 'Flag Lost'],
-    'forfeit-win': ['alert-success', 'Your opponent has surrendered'],
-    'forfeit-lose': ['alert-danger', 'You have surrendered'],
-    'nopieces-win': ['alert-success', 'Your opponent has no moveable pieces'],
-    'nopieces-lose': ['alert-danger', 'You have no moveable pieces left'],
-};
-
-const CLASS_NAMES = {
-    highlight: 'selected valid-move valid-attack valid-swap',
-    lastMove: 'last-move',
-};
+import {
+    CSS_CLASSES,
+    ELEMENT_IDS,
+    SELECTORS,
+    GAME_OVER_MESSAGES,
+    ERROR_MESSAGES,
+    GAME_STATUS
+} from './constants.js';
 
 class GameUIManager {
     constructor() {
-        this.gameRoot = this.getElement('game');
-        this.messages = this.getElement('messages');
-        this.board = this.getElement('board');
+        this.gameRoot = this.getElement(ELEMENT_IDS.GAME);
+        this.messages = this.getElement(ELEMENT_IDS.MESSAGES);
+        this.board = this.getElement(ELEMENT_IDS.BOARD);
         this.squares = null;
-        this.gameOverMessage = this.getElement('game-over');
-        this.forfeitPrompt = this.getElement('forfeit-game');
+        this.gameOverMessage = this.getElement(ELEMENT_IDS.GAME_OVER);
+        this.forfeitPrompt = this.getElement(ELEMENT_IDS.FORFEIT_GAME);
         this.playerColor = null;
         this.containers = {
-            you: this.getElement('you'),
-            opponent: this.getElement('opponent'),
+            you: this.getElement(ELEMENT_IDS.YOU),
+            opponent: this.getElement(ELEMENT_IDS.OPPONENT),
         };
+        // Selection state for board highlighting
+        this.selection = null;
+        this.curSelectedSquare = null;
+        this.prevSelectedSquare = null;
+        this.swapStr = null;
     }
 
     initBoard(html) {
         this.board.append(html);
-        this.squares = this.board.find('.square');
+        this.squares = this.board.find(SELECTORS.SQUARE);
         return this.squares;
     }
 
@@ -49,20 +48,25 @@ class GameUIManager {
     }
 
     showErrorMessage(data) {
-        const msg = (data === 'handshake unauthorized')
-            ? 'Client connection failed'
+        const msg = (data === ERROR_MESSAGES.HANDSHAKE_UNAUTHORIZED)
+            ? ERROR_MESSAGES.CLIENT_CONNECTION_FAILED
             : data.message;
 
-        this.messages.append(`<div class="alert alert-danger">${msg}</div>`);
+        // Use .text() to safely escape user input
+        const alertDiv = $('<div>')
+            .addClass(`alert ${CSS_CLASSES.ALERT_DANGER}`)
+            .text(msg);
+        
+        this.messages.append(alertDiv);
     }
 
     showForfeitPrompt(callback) {
-        this.forfeitPrompt.one('click', '#cancel-forfeit', () => {
+        this.forfeitPrompt.one('click', `#${ELEMENT_IDS.CANCEL_FORFEIT}`, () => {
             callback(false);
             this.forfeitPrompt.modal('hide');
         });
 
-        this.forfeitPrompt.one('click', '#confirm-forfeit', () => {
+        this.forfeitPrompt.one('click', `#${ELEMENT_IDS.CONFIRM_FORFEIT}`, () => {
             callback(true);
             this.forfeitPrompt.modal('hide');
         });
@@ -72,9 +76,9 @@ class GameUIManager {
 
     showGameOver(type) {
         const header = this.gameOverMessage.find('h2');
-        header.removeClass('alert-success alert-danger alert-warning');
+        header.removeClass(`${CSS_CLASSES.ALERT_SUCCESS} ${CSS_CLASSES.ALERT_DANGER} ${CSS_CLASSES.ALERT_WARNING}`);
 
-        const typeEntry = GAME_OVER_TYPES[type];
+        const typeEntry = GAME_OVER_MESSAGES[type];
         if (!typeEntry) return;
 
         const [cls, text] = typeEntry;
@@ -95,7 +99,7 @@ class GameUIManager {
     }
 
     clearHighlights() {
-        this.squares.removeClass(CLASS_NAMES.highlight);
+        this.squares.removeClass(CSS_CLASSES.HIGHLIGHT);
     }
 
     getPlayerContainer(color) {
@@ -110,16 +114,16 @@ class GameUIManager {
     }
 
     setPlayerStatus(container, player, activeColor, gameStatus) {
-        container.removeClass('active-player');
+        container.removeClass(CSS_CLASSES.ACTIVE_PLAYER);
         if (activeColor === player.color) {
-            container.addClass('active-player');
+            container.addClass(CSS_CLASSES.ACTIVE_PLAYER);
         }
 
-        container.removeClass('setup-player ready-player');
+        container.removeClass(`${CSS_CLASSES.SETUP_PLAYER} ${CSS_CLASSES.READY_PLAYER}`);
         if (player.isSetup === false) {
-            container.addClass('setup-player');
-        } else if (player.isSetup === true && gameStatus === 'pending') {
-            container.addClass('ready-player');
+            container.addClass(CSS_CLASSES.SETUP_PLAYER);
+        } else if (player.isSetup === true && gameStatus === GAME_STATUS.PENDING) {
+            container.addClass(CSS_CLASSES.READY_PLAYER);
         }
     }
 
@@ -145,11 +149,11 @@ class GameUIManager {
         });
     }
 
-    renderBoard(boardState, playerColor, gameState, clientBoard, gameClasses) {
+    renderBoard(boardState, playerColor, gameState, boardRenderer, gameClasses) {
         for (const sq in boardState) {
             const piece = boardState[sq];
             const pieceStr = piece == null ? null : (piece.colorChar + piece.rank.toString());
-            const pieceClass = clientBoard.getPieceClasses(pieceStr, playerColor, gameState);
+            const pieceClass = boardRenderer.getPieceClasses(pieceStr, playerColor, gameState);
             this.getElement(sq).removeClass(gameClasses).addClass(pieceClass);
         }
     }
@@ -157,9 +161,66 @@ class GameUIManager {
     highlightLastMove(lastMove) {
         if (!lastMove) return;
         if (lastMove.type === 'move' || lastMove.type === 'attack') {
-            this.getElement(lastMove.startSquare).addClass(CLASS_NAMES.lastMove);
-            this.getElement(lastMove.endSquare).addClass(CLASS_NAMES.lastMove);
+            this.getElement(lastMove.startSquare).addClass(CSS_CLASSES.LAST_MOVE);
+            this.getElement(lastMove.endSquare).addClass(CSS_CLASSES.LAST_MOVE);
         }
+    }
+
+    highlightValidSwap(gameState, piece, selectedSquareEl) {
+        const square = $(selectedSquareEl);
+        const squareId = square.attr('id');
+        this.selection = {
+            pieceStr: piece,
+            squareId
+        };
+
+        this.curSelectedSquare = squareId;
+        this.swapStr = `${this.curSelectedSquare} s ${this.prevSelectedSquare}`;
+
+        this.squares.removeClass('selected');
+        square.addClass('selected');
+
+        this.squares.removeClass('valid-swap');
+
+        for (const move of gameState.validSwap) {
+            if (move.type === 'swap' && move.startSquare === squareId) {
+                this.prevSelectedSquare = squareId;
+                $(`#${move.endSquare}`).addClass('valid-swap');
+            }
+        }
+    }
+
+    highlightValidMoves(gameState, piece, selectedSquareEl) {
+        const square = $(selectedSquareEl);
+        const squareId = square.attr('id');
+
+        this.selection = {
+            pieceStr: piece,
+            squareId
+        };
+
+        this.squares.removeClass('selected');
+        square.addClass('selected');
+
+        this.squares.removeClass('valid-move valid-attack');
+
+        for (const move of gameState.validMoves) {
+            if (move.startSquare === squareId) {
+                if (move.type === 'move') {
+                    $(`#${move.endSquare}`).addClass('valid-move');
+                } else if (move.type === 'attack') {
+                    $(`#${move.endSquare}`).addClass('valid-attack');
+                }
+            }
+        }
+    }
+
+    getSelection() {
+        return this.selection;
+    }
+
+    getSwapString() {
+        return this.swapStr;
     }
 }
 
