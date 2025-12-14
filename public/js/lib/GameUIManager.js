@@ -167,7 +167,7 @@ class GameUIManager {
     }
 
     highlightValidSwap(gameState, piece, selectedSquareEl) {
-        const square = $(selectedSquareEl);
+        const square = this.getElementFromDOM(selectedSquareEl);
         const squareId = square.attr('id');
         this.selection = {
             pieceStr: piece,
@@ -177,21 +177,21 @@ class GameUIManager {
         this.curSelectedSquare = squareId;
         this.swapStr = `${this.curSelectedSquare} s ${this.prevSelectedSquare}`;
 
-        this.squares.removeClass('selected');
-        square.addClass('selected');
+        this.squares.removeClass(CSS_CLASSES.SELECTED);
+        square.addClass(CSS_CLASSES.SELECTED);
 
-        this.squares.removeClass('valid-swap');
+        this.squares.removeClass(CSS_CLASSES.VALID_SWAP);
 
         for (const move of gameState.validSwap) {
             if (move.type === 'swap' && move.startSquare === squareId) {
                 this.prevSelectedSquare = squareId;
-                $(`#${move.endSquare}`).addClass('valid-swap');
+                this.getElement(move.endSquare).addClass(CSS_CLASSES.VALID_SWAP);
             }
         }
     }
 
     highlightValidMoves(gameState, piece, selectedSquareEl) {
-        const square = $(selectedSquareEl);
+        const square = this.getElementFromDOM(selectedSquareEl);
         const squareId = square.attr('id');
 
         this.selection = {
@@ -199,17 +199,17 @@ class GameUIManager {
             squareId
         };
 
-        this.squares.removeClass('selected');
-        square.addClass('selected');
+        this.squares.removeClass(CSS_CLASSES.SELECTED);
+        square.addClass(CSS_CLASSES.SELECTED);
 
-        this.squares.removeClass('valid-move valid-attack');
+        this.squares.removeClass(`${CSS_CLASSES.VALID_MOVE} ${CSS_CLASSES.VALID_ATTACK}`);
 
         for (const move of gameState.validMoves) {
             if (move.startSquare === squareId) {
                 if (move.type === 'move') {
-                    $(`#${move.endSquare}`).addClass('valid-move');
+                    this.getElement(move.endSquare).addClass(CSS_CLASSES.VALID_MOVE);
                 } else if (move.type === 'attack') {
-                    $(`#${move.endSquare}`).addClass('valid-attack');
+                    this.getElement(move.endSquare).addClass(CSS_CLASSES.VALID_ATTACK);
                 }
             }
         }

@@ -16,11 +16,9 @@ import {
     SELECTORS
 } from './lib/constants.js';
 
-// Module-level state (ES6 modules provide scope, no IIFE needed)
 let gameState = null;
 let gameID = null;
 let playerColor = null;
-let playerName = null;
 let gameClasses = null;
 
 const boardRenderer = new BoardRenderer();
@@ -33,7 +31,6 @@ const uiManager = new GameUIManager();
 const init = (config) => {
     gameID = config.gameID;
     playerColor = config.playerColor;
-    playerName = config.playerName;
 
     uiManager.setPlayerColor(playerColor);
 
@@ -84,26 +81,48 @@ const callbackHighlightMoves = (color, rank) => {
 };
 
 /**
- * Attach DOM event handlers
+ * Attach all DOM event handlers
  */
 const attachDOMEventHandlers = () => {
-    const baseString = `.${playerColor}.${RANK_PREFIX}`;
-    const squares = uiManager.getSquares();
+    attachSetupHandlers();
+    attachGameHandlers();
+    attachControlHandlers();
+};
 
-    // All pieces can be swapped
+/**
+ * Attach setup phase event handlers (piece swapping, finish setup)
+ */
+const attachSetupHandlers = () => {
+    const baseString = `.${playerColor}.${RANK_PREFIX}`;
+
+    // All pieces can be swapped during setup
     for (let i = MIN_RANK; i <= MAX_RANK; i++) {
         uiManager.gameRoot.on('click', `${baseString}${i}`, callbackHighlightSwap(playerColor[0], i.toString()));
     }
 
-    // Only highlight movable pieces
+    // Swap pieces
+    uiManager.gameRoot.on('click', SELECTORS.VALID_SWAP, (ev) => {
+        const m = uiManager.getSwapString();
+        uiManager.clearMessages();
+        socketManager.sendMove(gameID, m);
+    });
+
+    // Finish setup
+    uiManager.gameRoot.on('click', `#${ELEMENT_IDS.FINISH_SETUP}`, (ev) => {
+        socketManager.finishSetup(gameID);
+    });
+};
+
+/**
+ * Attach game phase event handlers (move highlighting, move execution, attacks)
+ */
+const attachGameHandlers = () => {
+    const baseString = `.${playerColor}.${RANK_PREFIX}`;
+
+    // Only highlight movable pieces during gameplay
     for (let i = MIN_RANK; i < MAX_MOVABLE_RANK; i++) {
         uiManager.gameRoot.on('click', `${baseString}${i}`, callbackHighlightMoves(playerColor[0], i.toString()));
     }
-
-    // Clear all move highlights
-    uiManager.gameRoot.on('click', SELECTORS.EMPTY, (ev) => {
-        uiManager.clearHighlights();
-    });
 
     // Perform a regular move
     uiManager.gameRoot.on('click', SELECTORS.VALID_MOVE, (ev) => {
@@ -118,17 +137,15 @@ const attachDOMEventHandlers = () => {
         uiManager.clearMessages();
         socketManager.sendMove(gameID, m);
     });
+};
 
-    //Swap pieces
-    uiManager.gameRoot.on('click', SELECTORS.VALID_SWAP, (ev) => {
-        const m = uiManager.getSwapString();
-        uiManager.clearMessages();
-        socketManager.sendMove(gameID, m);
-    });
-
-    //Finish setup
-    uiManager.gameRoot.on('click', `#${ELEMENT_IDS.FINISH_SETUP}`, (ev) => {
-        socketManager.finishSetup(gameID);
+/**
+ * Attach control event handlers (forfeit, clear highlights)
+ */
+const attachControlHandlers = () => {
+    // Clear all move highlights
+    uiManager.gameRoot.on('click', SELECTORS.EMPTY, (ev) => {
+        uiManager.clearHighlights();
     });
 
     // Forfeit game
@@ -161,6 +178,18 @@ const generateMoveString = (destinationSquare, symbol) => {
 };
 
 /**
+ * Identify the current player and opponent from game state
+ * @param {Object} gameState - The current game state
+ * @param {string} playerColor - The current player's color
+ * @returns {Object} Object with 'you' and 'opponent' player objects
+ */
+const identifyPlayers = (gameState, playerColor) => {
+    const you = gameState.players.find(p => p.color === playerColor);
+    const opponent = gameState.players.find(p => p.color !== playerColor);
+    return { you, opponent };
+};
+
+/**
  * Update UI from game state
  */
 const update = () => {
@@ -176,8 +205,7 @@ const update = () => {
     uiManager.highlightLastMove(gameState.lastMove);
 
     // Identify you and opponent
-    const you = gameState.players.find(p => p.color === playerColor);
-    const opponent = gameState.players.find(p => p.color !== playerColor);
+    const { you, opponent } = identifyPlayers(gameState, playerColor);
 
     // Test for checkmate
     if (gameState.status === GAME_STATUS.CHECKMATE) {
