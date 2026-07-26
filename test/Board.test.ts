@@ -1,3 +1,4 @@
+import { describe, it } from 'node:test';
 import { strict as assert } from 'assert';
 import { Board } from '../src/lib/Board';
 

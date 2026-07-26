@@ -44,7 +44,7 @@ Run unit tests
 npm run test
 ```
 
-Run unit tests with coverage. Results will be generated in coverage folder.
+Run unit tests with a coverage summary printed to the terminal.
 ```
 npm run test:coverage
 ```

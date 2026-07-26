@@ -1,3 +1,4 @@
+import { describe, it } from 'node:test';
 import { strict as assert } from 'assert';
 import { Piece, PieceRank } from '../src/lib/Piece';
 import { RailroadNetwork } from '../src/lib/RailroadNetwork';

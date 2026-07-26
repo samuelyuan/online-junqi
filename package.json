@@ -7,42 +7,25 @@
     "build": "tsc",
     "dev": "tsx watch ./src/server.ts",
     "tsc": "tsc",
-    "test": "mocha --require ts-node/register/transpile-only --extension ts",
-    "test:coverage": "c8 --reporter=html --report-dir=coverage npm run test"
+    "test": "tsx --test",
+    "test:coverage": "tsx --test --experimental-test-coverage"
   },
   "dependencies": {
-    "body-parser": "^2.2.2",
     "cookie": "^1.1.1",
-    "cookie-parser": "^1.4.7",
     "ejs": "^5.0.1",
     "errorhandler": "^1.5.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "method-override": "^3.0.0",
-    "mocha": "^11.3.0",
     "morgan": "^1.10.1",
-    "pug": "^3.0.4",
-    "serve-favicon": "^2.5.1",
-    "underscore": "^1.13.8"
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/errorhandler": "^1.5.3",
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.18.2",
-    "@types/method-override": "^3.0.0",
-    "@types/mocha": "^10.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.5.2",
-    "@types/serve-favicon": "^2.5.7",
-    "@typescript-eslint/parser": "^8.58.0",
-    "c8": "^11.0.0",
-    "socket.io": "^4.8.3",
-    "supertest": "^7.2.2",
-    "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
-  },
-  "overrides": {
-    "serialize-javascript": "^7.0.3"
   }
 }

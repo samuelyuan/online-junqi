@@ -1,3 +1,4 @@
+import { describe, it } from 'node:test';
 import { strict as assert } from 'assert';
 import { BUNKER_SQUARES, HEADQUARTER_SQUARES } from '../src/lib/BoardConstants';
 import { Graph } from '../src/lib/Graph';

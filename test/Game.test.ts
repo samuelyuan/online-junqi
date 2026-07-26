@@ -1,3 +1,4 @@
+import { describe, it } from 'node:test';
 import { strict as assert } from 'assert';
 import { Game } from '../src/lib/Game';
 import { PlayerSession } from '../src/types';

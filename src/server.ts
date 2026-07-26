@@ -4,13 +4,10 @@ import { MemoryStore } from 'express-session';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import * as httpRoutes from './routes/http';
-import bodyParser from 'body-parser';
 import * as cookie from 'cookie';
 import errorHandler from 'errorhandler';
 import logger from 'morgan';
-import methodOverride from 'method-override';
 import path from 'path';
-import favicon from 'serve-favicon';
 import * as socketRoutes from './routes/socket';
 import { GameStore } from './lib/GameStore';
 import { SessionData, SocketHandshake } from './types';
@@ -30,17 +27,15 @@ app.set('views', path.join(__dirname, '..', 'views'));
 app.set('view engine', 'ejs');
 
 // Middleware
-app.use(favicon(path.join(__dirname, '..', 'public/img/favicon.ico')));
 app.use(logger('dev'));
-app.use(methodOverride());
 app.use(session({
   resave: true,
   saveUninitialized: true,
   secret: 'mySecret',
   store: sessionStore
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 if ('development' == app.get('env')) {
   app.use(errorHandler());
