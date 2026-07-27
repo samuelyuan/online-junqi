@@ -1,8 +1,7 @@
 import Express from 'express';
 import { GameStore } from '../lib/GameStore';
-import { 
-  AuthenticatedRequest, 
-  StartGameFormData, 
+import {
+  StartGameFormData,
   JoinGameFormData,
   ValidatedStartGameData,
   ValidatedJoinGameData,
@@ -16,7 +15,7 @@ export class HttpRoutes {
    * Validate session data for "Game" page
    * Returns valid data on success or null on failure
    */
-  validateGame(req: AuthenticatedRequest): ValidatedGameData | null {
+  validateGame(req: Express.Request): ValidatedGameData | null {
 
     // These must exist
     if (!req.session.gameID) {
@@ -107,8 +106,8 @@ export class HttpRoutes {
   /**
    * Render "Home" Page
    */
-  home(req: AuthenticatedRequest, res: Express.Response): void {
-    var listIDs = DB.list();
+  home(req: Express.Request, res: Express.Response): void {
+    const listIDs = DB.list();
 
     // Welcome
     res.render('home', { listIDs: listIDs });
@@ -117,12 +116,12 @@ export class HttpRoutes {
   /**
    * Render "Game" Page (or redirect to home page if session is invalid)
    */
-  game(req: AuthenticatedRequest, res: Express.Response): void {
+  game(req: Express.Request, res: Express.Response): void {
 
     req.session.playerName = "Anonymous";
 
     // Validate session data
-    var validData = this.validateGame(req);
+    const validData = this.validateGame(req);
     if (!validData) {
       res.redirect('/');
       return;
@@ -137,7 +136,7 @@ export class HttpRoutes {
    * Redirects to game page on success or home page on failure
    */
   startGame(req: Express.Request<{}, {}, StartGameFormData>, res: Express.Response): void {
-    var self = this;
+    const self = this;
 
     // Create a new session
     req.session.regenerate(function (err: Error | null) {
@@ -147,19 +146,19 @@ export class HttpRoutes {
       }
 
       // Validate form input
-      var validData = self.validateStartGame(req);
+      const validData = self.validateStartGame(req);
       if (!validData) {
         res.redirect('/');
         return;
       }
 
       // Create new game
-      var gameID = DB.add(validData);
+      const gameID = DB.add(validData);
 
       // Save data to session
-      (req.session as any).gameID = gameID;
-      (req.session as any).playerColor = validData.playerColor;
-      (req.session as any).playerName = validData.playerName;
+      req.session.gameID = gameID;
+      req.session.playerColor = validData.playerColor;
+      req.session.playerName = validData.playerName;
 
       // Redirect to game page
       res.redirect('/game/' + gameID);
@@ -171,7 +170,7 @@ export class HttpRoutes {
    * Redirects to game page on success or home page on failure
    */
   joinGame(req: Express.Request<{}, {}, JoinGameFormData>, res: Express.Response): void {
-    var self = this;
+    const self = this;
 
     // Create a new session
     req.session.regenerate(function (err: Error | null) {
@@ -181,26 +180,30 @@ export class HttpRoutes {
       }
 
       // Validate form input
-      var validData = self.validateJoinGame(req);
+      const validData = self.validateJoinGame(req);
       if (!validData) {
         res.redirect('/');
         return;
       }
 
       // Find specified game
-      var game = DB.find(validData.gameID);
+      const game = DB.find(validData.gameID);
       if (!game) {
         res.redirect('/');
         return;
       }
 
       // Determine which player (color) to join as
-      var joinColor = (game.players[0].joined) ? game.players[1].color : game.players[0].color;
+      const joinColor = (game.players[0].joined) ? game.players[1].color : game.players[0].color;
+      if (!joinColor) {
+        res.redirect('/');
+        return;
+      }
 
       // Save data to session
-      (req.session as any).gameID = validData.gameID;
-      (req.session as any).playerColor = joinColor;
-      (req.session as any).playerName = validData.playerName;
+      req.session.gameID = validData.gameID;
+      req.session.playerColor = joinColor;
+      req.session.playerName = validData.playerName;
 
       // Redirect to game page
       res.redirect('/game/' + validData.gameID);
@@ -220,7 +223,7 @@ export class HttpRoutes {
  */
 export function attach(app: Express.Application, db: GameStore) {
   DB = db;
-  var httpRoutes = new HttpRoutes();
+  const httpRoutes = new HttpRoutes();
 
   app.get('/', httpRoutes.home.bind(httpRoutes));
   app.get('/game/:id', httpRoutes.game.bind(httpRoutes));

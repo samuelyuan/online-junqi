@@ -1,7 +1,32 @@
 body  { background-color: #f8f8f8; }
 table { border-collapse: collapse; }
 
-#banner { color: #ffffff; background-size: cover; background-image: url("../img/banner.jpg"); }
+/* Brand colors, hardcoded so a future Bootstrap upgrade can't silently change them */
+nav.navbar { background-color: #2196f3 !important; margin-bottom: 23px !important; }
+
+.btn-primary                                             { color: #fff !important; background-color: #2196f3 !important; border-color: transparent !important; }
+.btn-primary:hover, .btn-primary:focus,
+.btn-primary:active, .btn-primary.active                 { color: #fff !important; background-color: #0c7cd5 !important; border-color: transparent !important; }
+
+.btn-secondary                                            { color: #444 !important; background-color: #fff !important; border-color: transparent !important; }
+.btn-secondary:hover, .btn-secondary:focus,
+.btn-secondary:active, .btn-secondary.active              { color: #444 !important; background-color: #e6e6e6 !important; border-color: transparent !important; }
+
+.btn-danger                                               { color: #fff !important; background-color: #e51c23 !important; border-color: transparent !important; }
+.btn-danger:hover, .btn-danger:focus,
+.btn-danger:active, .btn-danger.active                    { color: #fff !important; background-color: #c81419 !important; border-color: transparent !important; }
+
+.form-control        { background-color: transparent !important; border: 1px solid transparent !important; box-shadow: inset 0 1px 1px rgba(0,0,0,.075) !important; }
+.form-control:focus   { border-color: #66afe9 !important; box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6) !important; }
+
+.alert         { border: none !important; color: #fff !important; }
+.alert-success { background-color: #4caf50 !important; }
+.alert-warning { background-color: #ff9800 !important; }
+.alert-danger  { background-color: #e51c23 !important; }
+
+#banner { color: #ffffff; background-size: cover; background-image: url("../img/banner.jpg"); padding: 30px 0; margin-bottom: 30px; }
+
+.field-group { margin-bottom: 1rem; }
 
 #startForm, #joinForm { padding: 15px; }
 
@@ -90,7 +115,7 @@ table { border-collapse: collapse; }
  * Popup Windows
  */
 
-.modal-content { background-color: #f8f8f8; }
+.modal-content { background-color: #f8f8f8; border: 1px solid transparent !important; box-shadow: 0 3px 9px rgba(0,0,0,.5) !important; }
 .modal-footer  { margin-top: 0; }
 
 #pawn-promotion h3    { margin-bottom: 20px;                }
@@ -119,28 +144,48 @@ table { border-collapse: collapse; }
     box-shadow: 0px 5px 0px 0px #C02B21;
 }
 
-.blue.rank0:before   { content: "炸弹"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank1:before   { content: "司令"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank2:before   { content: "军长"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank3:before   { content: "师长"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank4:before   { content: "旅长"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank5:before   { content: "团长"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank6:before   { content: "营长"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank7:before   { content: "连长"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank8:before   { content: "排长"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank9:before   { content: "工兵"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank10:before   { content: "地雷"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
-.blue.rank11:before   { content: "军旗"; background-color: #108FE8;color: white;border-left: solid 1px #2E4476;background: #3B5999;-webkit-box-shadow: 0px 5px 0px 0px #2E4476;box-shadow: 0px 5px 0px 0px #2E4476; }
+.blue.rank0:before, .blue.rank1:before, .blue.rank2:before, .blue.rank3:before,
+.blue.rank4:before, .blue.rank5:before, .blue.rank6:before, .blue.rank7:before,
+.blue.rank8:before, .blue.rank9:before, .blue.rank10:before, .blue.rank11:before {
+  color: white;
+  background: #3B5999;
+  border-left: solid 1px #2E4476;
+  -webkit-box-shadow: 0px 5px 0px 0px #2E4476;
+  box-shadow: 0px 5px 0px 0px #2E4476;
+}
 
-.red.rank0:before   { content: "炸弹"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank1:before   { content: "司令"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank2:before   { content: "军长"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank3:before   { content: "师长"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank4:before   { content: "旅长"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank5:before   { content: "团长"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank6:before   { content: "营长"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank7:before   { content: "连长"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank8:before   { content: "排长"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank9:before   { content: "工兵"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank10:before   { content: "地雷"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
-.red.rank11:before   { content: "军旗"; background-color: #DE463B;color: white;border-left: solid 1px #C02B21;-webkit-box-shadow: 0px 5px 0px 0px #C02B21;box-shadow: 0px 5px 0px 0px #C02B21;}
+.blue.rank0:before   { content: "炸弹"; }
+.blue.rank1:before   { content: "司令"; }
+.blue.rank2:before   { content: "军长"; }
+.blue.rank3:before   { content: "师长"; }
+.blue.rank4:before   { content: "旅长"; }
+.blue.rank5:before   { content: "团长"; }
+.blue.rank6:before   { content: "营长"; }
+.blue.rank7:before   { content: "连长"; }
+.blue.rank8:before   { content: "排长"; }
+.blue.rank9:before   { content: "工兵"; }
+.blue.rank10:before  { content: "地雷"; }
+.blue.rank11:before  { content: "军旗"; }
+
+.red.rank0:before, .red.rank1:before, .red.rank2:before, .red.rank3:before,
+.red.rank4:before, .red.rank5:before, .red.rank6:before, .red.rank7:before,
+.red.rank8:before, .red.rank9:before, .red.rank10:before, .red.rank11:before {
+  color: white;
+  background-color: #DE463B;
+  border-left: solid 1px #C02B21;
+  -webkit-box-shadow: 0px 5px 0px 0px #C02B21;
+  box-shadow: 0px 5px 0px 0px #C02B21;
+}
+
+.red.rank0:before   { content: "炸弹"; }
+.red.rank1:before   { content: "司令"; }
+.red.rank2:before   { content: "军长"; }
+.red.rank3:before   { content: "师长"; }
+.red.rank4:before   { content: "旅长"; }
+.red.rank5:before   { content: "团长"; }
+.red.rank6:before   { content: "营长"; }
+.red.rank7:before   { content: "连长"; }
+.red.rank8:before   { content: "排长"; }
+.red.rank9:before   { content: "工兵"; }
+.red.rank10:before  { content: "地雷"; }
+.red.rank11:before  { content: "军旗"; }

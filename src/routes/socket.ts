@@ -1,32 +1,32 @@
-import { Server, Socket } from 'socket.io';
 import { GameStore } from '../lib/GameStore';
 import { Game } from '../lib/Game';
-import { 
-  SessionData, 
-  MoveData, 
-  DebugInfo, 
+import {
+  SessionData,
+  MoveData,
+  DebugInfo,
   ErrorResponse,
-  SocketHandshake 
+  GameIOServer,
+  GameIOSocket
 } from '../types';
 
-// Helper function to safely get session from handshake
-function getSession(socket: Socket): SessionData {
-  return (socket.handshake as any).session as SessionData;
+// Helper function to safely get session from a connected socket
+function getSession(socket: GameIOSocket): SessionData {
+  return socket.data.session;
 }
 
 // Helper function to send filtered updates to all players in a game
 function sendFilteredUpdatesToGame(gameID: string, game: Game) {
   if (!IO) return;
-  
+
   // Get all sockets in this game room
   const room = IO.sockets.adapter.rooms.get(gameID);
   if (!room) return;
-  
+
   // Send individual filtered updates to each player
   room.forEach(socketId => {
     const socket = IO!.sockets.sockets.get(socketId);
     if (socket) {
-      const session = (socket.handshake as any).session as SessionData;
+      const session = socket.data.session;
       if (session && session.playerColor) {
         // Send filtered state for this specific player
         socket.emit('update', game.getState(session.playerColor));
@@ -35,14 +35,14 @@ function sendFilteredUpdatesToGame(gameID: string, game: Game) {
   });
 }
 
-let IO: Server | null = null;
+let IO: GameIOServer | null = null;
 let DB: GameStore | null = null;
 
 /**
  * Add player to game
  * Emits an "update" event on success or an "error" event on failure
  */
-const join = function (this: Socket, gameID: string) {
+const join = function (this: GameIOSocket, gameID: string) {
   const sess = getSession(this);
   const debugInfo: DebugInfo = {
     socketID: this.id,
@@ -87,7 +87,7 @@ const join = function (this: Socket, gameID: string) {
 /*
 Finish setting up pieces before allowing gameplay to begin.
 */
-const finishSetup = function (this: Socket, gameID: string) {
+const finishSetup = function (this: GameIOSocket, gameID: string) {
   const sess = getSession(this);
   const debugInfo: DebugInfo = {
     socketID: this.id,
@@ -129,7 +129,7 @@ const finishSetup = function (this: Socket, gameID: string) {
  * Apply move to game
  * Emits an "update" event on success or an "error" event on failure
  */
-const move = function (this: Socket, data: MoveData) {
+const move = function (this: GameIOSocket, data: MoveData) {
   const sess = getSession(this);
   const debugInfo: DebugInfo = {
     socketID: this.id,
@@ -172,7 +172,7 @@ const move = function (this: Socket, data: MoveData) {
  * Forfeit a game
  * Emits an "update" event on success or an "error" event on failure
  */
-const forfeit = function (this: Socket, gameID: string) {
+const forfeit = function (this: GameIOSocket, gameID: string) {
   const sess = getSession(this);
   const debugInfo: DebugInfo = {
     socketID: this.id,
@@ -212,8 +212,9 @@ const forfeit = function (this: Socket, gameID: string) {
 
 /**
  * Remove player from game
+ * Emits an "update" event to remaining players on success
  */
-const disconnect = function (this: Socket) {
+const disconnect = function (this: GameIOSocket) {
   const sess = getSession(this);
   const debugInfo: DebugInfo = {
     socketID: this.id,
@@ -235,6 +236,9 @@ const disconnect = function (this: Socket) {
     return;
   }
 
+  // Send filtered updates to remaining players in the game
+  sendFilteredUpdatesToGame(sess.gameID, game);
+
   console.log(sess.playerName + ' left ' + sess.gameID);
   console.log('Socket ' + this.id + ' disconnected');
 };
@@ -242,12 +246,12 @@ const disconnect = function (this: Socket) {
 /**
  * Attach route/event handlers for socket.io
  */
-export function attach(io: Server, db: GameStore): void {
+export function attach(io: GameIOServer, db: GameStore): void {
   IO = io;
   DB = db;
 
   // When a new socket connection is made
-  io.sockets.on('connection', function (socket: Socket) {
+  io.sockets.on('connection', function (socket: GameIOSocket) {
     // Attach the event handlers
     socket.on('join', join);
     socket.on('finishSetup', finishSetup);

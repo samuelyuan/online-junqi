@@ -10,7 +10,7 @@
         <link href="/css/styles.css" rel="stylesheet">
     </head>
     <body>
-        <div id="banner" class="jumbotron">
+        <div id="banner">
             <div class="container">
                 <h1 style="color: white;">Online Junqi</h1>
                 <p>
@@ -28,7 +28,7 @@
                       <form id="joinForm" action="/join" method="POST" role="form">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="form-group">
+                                    <div class="field-group">
                                         <label for="gameID">Select a Game</label>
                                        <!-- <input id="gameID" type="text" name="game-id" class="form-control"> -->
                                         
@@ -51,14 +51,14 @@
                       <form id="startForm" action="/start" method="POST" role="form">
                           <div class="row">
                                 <div class="col-md-6">
-                                    <div class="form-group">
+                                    <div class="field-group">
                                         <label>Play as</label>
                                         <div>
-                                            <div data-toggle="buttons" class="btn-group">
-                                                <label class="btn btn-default active">
+                                            <div data-toggle="buttons" class="btn-group btn-group-toggle">
+                                                <label class="btn btn-secondary active">
                                                     <input type="radio" name="player-color" value="blue" checked="checked">Blue
                                                 </label>
-                                                <label class="btn btn-default">
+                                                <label class="btn btn-secondary">
                                                     <input type="radio" name="player-color" value="red">Red
                                                 </label>
                                             </div>

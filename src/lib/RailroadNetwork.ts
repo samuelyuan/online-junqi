@@ -22,14 +22,14 @@ export class RailroadNetwork {
     const singleRail: Set<string> = this.getAllRailroadsFromSquare(currentSquare);
 
     // BFS search on the railroads
-    var reachableSquares: string[] = [];
-    var visited = new Set<string>();
+    const reachableSquares: string[] = [];
+    const visited = new Set<string>();
 
     visited.add(currentSquare);
     reachableSquares.push(currentSquare);
 
     while (reachableSquares.length != 0) {
-      var iterSquare: string = reachableSquares.shift()!;
+      const iterSquare: string = reachableSquares.shift()!;
       const allNeighbors: Set<string> = this.graph.getAdjacentNeighbors(iterSquare);
       const neighborsOnRailroad: string[] = Array.from(allNeighbors).filter((nextSquare) => this.isOnRail(nextSquare));
 
@@ -56,7 +56,7 @@ export class RailroadNetwork {
     }
 
     // include squares that aren't on the railroad
-    var neighbors: Set<string> = this.graph.getAdjacentNeighbors(currentSquare);
+    const neighbors: Set<string> = this.graph.getAdjacentNeighbors(currentSquare);
     neighbors.forEach(function(square: string) {
       visited.add(square);
     });
@@ -70,7 +70,7 @@ export class RailroadNetwork {
 
   getAllRailroadsFromSquare(currentSquare: string): Set<string> {
     // get all positions that are accessible on the same railroad
-    var singleRail: string[] = this.railLines
+    const singleRail: string[] = this.railLines
       .filter((railroad) => railroad.includes(currentSquare))
       .flat();
     return new Set(singleRail);

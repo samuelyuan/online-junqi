@@ -13,12 +13,12 @@ export class BoardValidator {
             }
 
             // All other squares must have a piece
-            var piece: Piece | null = board[square];
+            const piece: Piece | null = board[square];
             if (!piece) {
                 return false;
             }
 
-            var squareRowNum: number = this.getBoardSquareRow(square);
+            const squareRowNum: number = this.getBoardSquareRow(square);
             if (piece.getRank() === PieceRank.BOMB) {
                 return this.isValidBombPosition(squareRowNum);
             } else if (piece.getRank() === PieceRank.LANDMINE) {
@@ -33,14 +33,14 @@ export class BoardValidator {
     }
 
     // Assumes current position is valid
-    isDestinationPositionValid(pieceRank: string, current: string, destination: string): boolean {
-        var destRowNum: number = this.getBoardSquareRow(destination);
+    isDestinationPositionValid(pieceRank: PieceRank, current: string, destination: string): boolean {
+        const destRowNum: number = this.getBoardSquareRow(destination);
         // Check if piece has restrictions
-        if (pieceRank === PieceRank.BOMB.toString()) {
+        if (pieceRank === PieceRank.BOMB) {
             return this.isValidBombPosition(destRowNum);
-        } else if (pieceRank === PieceRank.LANDMINE.toString()) {
+        } else if (pieceRank === PieceRank.LANDMINE) {
             return this.isValidLandminePosition(destRowNum);
-        } else if (pieceRank === PieceRank.FLAG.toString()) {
+        } else if (pieceRank === PieceRank.FLAG) {
             return this.isValidFlagPosition(current, destination);
         }
 
@@ -55,22 +55,22 @@ export class BoardValidator {
 
     isValidBombPosition(rowNum: number): boolean {
         // don't allow front row placement
-        var isPlayer1FrontRow = (rowNum === 6);
-        var isPlayer2FrontRow = (rowNum === 7);
+        const isPlayer1FrontRow = (rowNum === 6);
+        const isPlayer2FrontRow = (rowNum === 7);
         return !isPlayer1FrontRow && !isPlayer2FrontRow;
     }
 
     isValidLandminePosition(rowNum: number): boolean {
         // landmines only in back two rows
-        var isPlayer1BackTwoRows = (rowNum === 1 || rowNum === 2);
-        var isPlayer2BackTwoRows = (rowNum === 11 || rowNum === 12);
+        const isPlayer1BackTwoRows = (rowNum === 1 || rowNum === 2);
+        const isPlayer2BackTwoRows = (rowNum === 11 || rowNum === 12);
         return isPlayer1BackTwoRows || isPlayer2BackTwoRows;
     }
 
     isValidFlagPosition(current: string, destination: string): boolean {
         // flag can only go in headquarters
-        var isPlayer1Headquarters = HEADQUARTER_SQUARE_GROUP[0].includes(current) && HEADQUARTER_SQUARE_GROUP[0].includes(destination) && current != destination;
-        var isPlayer2Headquarters = HEADQUARTER_SQUARE_GROUP[1].includes(current) && HEADQUARTER_SQUARE_GROUP[1].includes(destination) && current != destination;
+        const isPlayer1Headquarters = HEADQUARTER_SQUARE_GROUP[0].includes(current) && HEADQUARTER_SQUARE_GROUP[0].includes(destination) && current != destination;
+        const isPlayer2Headquarters = HEADQUARTER_SQUARE_GROUP[1].includes(current) && HEADQUARTER_SQUARE_GROUP[1].includes(destination) && current != destination;
         return isPlayer1Headquarters || isPlayer2Headquarters;
     }
 }

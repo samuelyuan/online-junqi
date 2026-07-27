@@ -2,6 +2,7 @@ import { BoardSquarePieceMap, BUNKER_SQUARES, RAIL_LINES } from './BoardConstant
 import { BoardGenerator } from './BoardGenerator';
 import { BoardValidator } from './BoardValidator';
 import {
+  GameResult,
   Piece,
   PieceRank,
 } from './Piece';
@@ -18,6 +19,12 @@ export interface SwapMove {
   startSquare: string;
   endSquare: string;
 }
+
+const MOVE_TYPE_BY_COMPARE_RESULT: Record<GameResult, string> = {
+  [GameResult.WIN]: 'capture',
+  [GameResult.DRAW]: 'equal',
+  [GameResult.LOSE]: 'dies'
+};
 
 export class Board {
   boardState: BoardSquarePieceMap;
@@ -146,16 +153,12 @@ export class Board {
     }
     const playerPiece = board[startSquare]!;
     const enemyPiece = board[destination]!;
-    const compareResult: number = playerPiece.compareRank(enemyPiece);
+    const compareResult: GameResult = playerPiece.compareRank(enemyPiece);
 
-    const compareResultStringMap = new Map();
-    compareResultStringMap.set(1, 'capture'); // greater rank
-    compareResultStringMap.set(0, 'equal'); // equal rank
-    compareResultStringMap.set(-1, 'dies'); // lower rank
-
-    if (compareResultStringMap.has(compareResult)) {
+    const moveType = MOVE_TYPE_BY_COMPARE_RESULT[compareResult];
+    if (moveType) {
       return {
-        type: compareResultStringMap.get(compareResult),
+        type: moveType,
         startSquare: startSquare,
         endSquare: destination
       };
@@ -199,7 +202,7 @@ export class Board {
     const piece: Piece = board[square]!;
     return this.getAllPlayerSquares(board, piece.getPieceColor())
       .filter((destination) => square !== destination) // skip itself
-      .filter((destination) => this.boardValidator.isDestinationPositionValid(piece.getRankString(), square, destination))
+      .filter((destination) => this.boardValidator.isDestinationPositionValid(piece.getRank(), square, destination))
       .map((destination) => ({
         type: 'swap',
         startSquare: square,

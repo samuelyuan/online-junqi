@@ -1,17 +1,8 @@
-// express-session.d.ts
+// @types/express-session already augments express.Request.session globally as
+// `Session & Partial<SessionData>`, so only SessionData itself needs extending here.
 import 'express-session';
+import { SessionData as AppSessionData } from '../src/types';
 
 declare module 'express-session' {
-  interface SessionData {
-    gameID: string;
-    playerName: string;
-    playerColor: string | null;
-    regenerate(callback?: (err: any) => void): void;
-  }
-}
-
-declare module 'express-serve-static-core' {
-  interface Request {
-    session: SessionData;
-  }
+  interface SessionData extends AppSessionData {}
 }

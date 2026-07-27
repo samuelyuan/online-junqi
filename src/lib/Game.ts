@@ -1,6 +1,6 @@
 import { Board, PlayerMove, SwapMove } from './Board';
 import { Piece, PieceRank } from './Piece';
-import { GameStatus, PlayerSession, PlayerStatus } from '../types';
+import { ClientPieceView, FilteredBoardState, GameStateDTO, GameStatus, PlayerSession, PlayerStatus } from '../types';
 
 /*
  * The Game object
@@ -65,8 +65,8 @@ export class Game {
      * Get the current game state as a plain object for data transfer
      * @param playerColor - The color of the player requesting the state (for filtering)
      */
-    getState(playerColor?: string) {
-        const baseState: any = {
+    getState(playerColor?: string): GameStateDTO {
+        const baseState: GameStateDTO = {
             status: this.status,
             activePlayer: this.activePlayer,
             players: this.players,
@@ -77,16 +77,10 @@ export class Game {
             validSwap: this.validSwap,
             lastMove: this.lastMove,
             modifiedOn: this.modifiedOn,
-            colorMap: this.colorMap
+            colorMap: this.colorMap,
+            // No playerColor means an unfiltered admin/spectator view
+            board: playerColor ? this.getFilteredBoardState(playerColor) : this.board.boardState
         };
-
-        if (playerColor) {
-            // Filter board to only show what this player should see
-            baseState.board = this.getFilteredBoardState(playerColor);
-        } else {
-            // For admin/spectator view - show everything
-            baseState.board = this.board.boardState;
-        }
 
         return baseState;
     }
@@ -95,9 +89,9 @@ export class Game {
      * Get filtered board state for a specific player
      * Hides opponent piece ranks to maintain game security
      */
-    private getFilteredBoardState(playerColor: string) {
-        const filteredState: any = {};
-        
+    private getFilteredBoardState(playerColor: string): FilteredBoardState {
+        const filteredState: FilteredBoardState = {};
+
         Object.keys(this.board.boardState).forEach(square => {
             const piece = this.board.boardState[square];
             if (!piece) {
@@ -118,17 +112,11 @@ export class Game {
                 // Exception: reveal enemy flag if commander is dead
                 const shouldRevealFlag = piece.getRank() === PieceRank.FLAG && opponent && !opponent.hasCommander;
 
-                if (shouldRevealFlag) {
-                    filteredState[square] = {
-                        colorChar: piece.colorChar,
-                        rank: piece.rank
-                    };
-                } else {
-                    filteredState[square] = {
-                        colorChar: piece.colorChar,
-                        rank: 'hidden' // Don't expose actual rank!
-                    };
-                }
+                const view: ClientPieceView = shouldRevealFlag
+                    ? { colorChar: piece.colorChar, rank: piece.rank }
+                    : { colorChar: piece.colorChar, rank: 'hidden' }; // Don't expose actual rank!
+
+                filteredState[square] = view;
             }
         });
         return filteredState;

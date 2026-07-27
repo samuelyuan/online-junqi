@@ -36,10 +36,6 @@ export class Piece {
     return this.rank;
   }
 
-  getRankString(): string {
-    return this.rank.toString();
-  }
-
   isMovable(): boolean {
     return this.rank !== PieceRank.LANDMINE && this.rank !== PieceRank.FLAG;
   }

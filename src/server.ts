@@ -2,7 +2,7 @@ import express from 'express';
 import session from 'express-session';
 import { MemoryStore } from 'express-session';
 import { createServer } from 'http';
-import { Server } from 'socket.io';
+import { DefaultEventsMap, Server } from 'socket.io';
 import * as httpRoutes from './routes/http';
 import * as cookie from 'cookie';
 import errorHandler from 'errorhandler';
@@ -10,12 +10,12 @@ import logger from 'morgan';
 import path from 'path';
 import * as socketRoutes from './routes/socket';
 import { GameStore } from './lib/GameStore';
-import { SessionData, SocketHandshake } from './types';
+import { SessionData, SocketData } from './types';
 
 const app = express();
 const server = createServer(app);
 // Create a Socket.IO server
-const io = new Server(server);
+const io = new Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>(server);
 
 const DB = new GameStore();
 
@@ -68,17 +68,15 @@ io.use(function (socket, next) {
     if (err) {
       return next(err);
     }
-    
+
     // Check if session has our custom properties
-    const customSession = session as any;
-    if (customSession && customSession.gameID && customSession.playerColor && customSession.playerName) {
-      // Create a proper SessionData object
+    if (session && session.gameID && session.playerColor && session.playerName) {
       const sessionData: SessionData = {
-        gameID: customSession.gameID,
-        playerColor: customSession.playerColor,
-        playerName: customSession.playerName
+        gameID: session.gameID,
+        playerColor: session.playerColor,
+        playerName: session.playerName
       };
-      (socket.handshake as any).session = sessionData;
+      socket.data.session = sessionData;
       next(); // Proceed to the next middleware
     } else {
       next(new Error('Not authorized')); // Pass an error if not authorized
@@ -90,33 +88,6 @@ io.use(function (socket, next) {
 // Attach routes
 httpRoutes.attach(app, DB);
 socketRoutes.attach(io, DB);
-
-// Handle socket disconnection
-io.sockets.on('disconnect', function (socket) {
-  const sess = (socket.handshake as any).session as SessionData;
-  if (sess && sess.gameID) {
-    const game = DB.find(sess.gameID);
-    if (game) {
-      game.removePlayer(sess);
-      
-      // Send filtered updates to remaining players using the socket routes helper
-      // We need to get all remaining sockets in the game room and send filtered updates
-      const room = io.sockets.adapter.rooms.get(sess.gameID);
-      if (room) {
-        room.forEach(socketId => {
-          const remainingSocket = io.sockets.sockets.get(socketId);
-          if (remainingSocket && remainingSocket.id !== socket.id) {
-            const remainingSession = (remainingSocket.handshake as any).session as SessionData;
-            if (remainingSession && remainingSession.playerColor) {
-              // Send filtered state for this specific player
-              remainingSocket.emit('update', game.getState(remainingSession.playerColor));
-            }
-          }
-        });
-      }
-    }
-  }
-});
 
 // And away we go
 const port = app.get('port');

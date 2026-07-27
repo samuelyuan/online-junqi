@@ -1,17 +1,23 @@
-import { Request } from 'express';
+import type { DefaultEventsMap, Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
 import { Game } from '../lib/Game';
+import { BoardSquarePieceMap } from '../lib/BoardConstants';
+import { Piece, PieceRank } from '../lib/Piece';
+import { PlayerMove, SwapMove } from '../lib/Board';
 
-// Session-related types
+// Extended onto express-session's own SessionData via module augmentation in types/express-session.d.ts
 export interface SessionData {
   gameID: string;
   playerColor: 'red' | 'blue';
   playerName: string;
 }
 
-// Socket.IO extended handshake type
-export interface SocketHandshake {
+// Custom per-connection data attached to each authenticated socket
+export interface SocketData {
   session: SessionData;
 }
+
+export type GameIOServer = SocketIOServer<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>;
+export type GameIOSocket = SocketIOSocket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>;
 
 // Game-related types
 export interface PlayerSession {
@@ -38,6 +44,27 @@ export enum GameStatus {
   CHECKMATE = "checkmate"
 }
 
+// A single square as sent to a specific client: opponent ranks are hidden unless revealed
+export interface ClientPieceView {
+  colorChar: string;
+  rank: PieceRank | 'hidden';
+}
+
+export type FilteredBoardState = { [square: string]: ClientPieceView | null };
+
+export interface GameStateDTO {
+  status: GameStatus;
+  activePlayer: PlayerStatus | null;
+  players: PlayerStatus[];
+  capturedPieces: Piece[];
+  validMoves: PlayerMove[];
+  validSwap: SwapMove[];
+  lastMove: PlayerMove | null;
+  modifiedOn: number;
+  colorMap: { [key: string]: number };
+  board: BoardSquarePieceMap | FilteredBoardState;
+}
+
 // Socket event types
 export interface MoveData {
   gameID: string;
@@ -55,11 +82,6 @@ export interface DebugInfo {
 export interface ErrorResponse {
   message: string;
   code?: string;
-}
-
-// Extended Express types
-export interface AuthenticatedRequest extends Request {
-  session: any;
 }
 
 // Form validation types

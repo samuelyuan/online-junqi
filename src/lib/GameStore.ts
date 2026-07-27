@@ -48,20 +48,18 @@ export class GameStore implements GameStoreInterface {
     return (this.games.hasOwnProperty(key)) ? this.games[key] : false;
   }
 
-  list(): string[] {
-    const listIDs: string[] = [];
+  // Remove games with no players joined
+  private pruneEmptyGames(): void {
     Object.keys(this.games).forEach(key => {
-      //if the room is empty, then remove it from the list
-      if (
-        this.games[key].players[0].joined === false &&
-        this.games[key].players[1].joined === false
-      ) {
+      const game = this.games[key];
+      if (game.players[0].joined === false && game.players[1].joined === false) {
         delete this.games[key];
-        return;
       }
-      listIDs.push(key);
     });
-    console.log(listIDs);
-    return listIDs;
+  }
+
+  list(): string[] {
+    this.pruneEmptyGames();
+    return Object.keys(this.games);
   };
 }

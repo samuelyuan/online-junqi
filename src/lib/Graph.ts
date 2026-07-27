@@ -127,7 +127,7 @@ export class Graph {
     const rank = parseInt(square.substring(1, square.length), 10);
 
     // Apply transform
-    const destFile = alpha2num(file) + transform.x;
+    const destFile = Graph.alpha2num(file) + transform.x;
     const destRank = rank + transform.y;
 
     // Check boundaries
@@ -135,7 +135,7 @@ export class Graph {
     if (destRank < 1 || destRank > 12) { return null; }
 
     // Return new square
-    return num2alpha(destFile) + destRank;
+    return Graph.num2alpha(destFile) + destRank;
   };
 
   // Add an unconnected edge between node1 and node2
@@ -152,26 +152,26 @@ export class Graph {
     neighborMap[node1Key].add(node2Key);
     neighborMap[node2Key].add(node1Key);
   }
-}
 
-var alpha2num = function(a: string) {
-  switch (a) {
-    case 'a': return 1;
-    case 'b': return 2;
-    case 'c': return 3;
-    case 'd': return 4;
-    case 'e': return 5;
-    default : return 6; // out of bounds
+  private static alpha2num(a: string): number {
+    switch (a) {
+      case 'a': return 1;
+      case 'b': return 2;
+      case 'c': return 3;
+      case 'd': return 4;
+      case 'e': return 5;
+      default: return 6; // out of bounds
+    }
   }
-};
 
-var num2alpha = function(n: number) {
+  private static num2alpha(n: number): string {
     switch (n) {
-       case 1: return 'a';
-       case 2: return 'b';
-       case 3: return 'c';
-       case 4: return 'd';
-       case 5: return 'e';
+      case 1: return 'a';
+      case 2: return 'b';
+      case 3: return 'c';
+      case 4: return 'd';
+      case 5: return 'e';
       default: return 'f'; // out of bounds
     }
-};
+  }
+}
