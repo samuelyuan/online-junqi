@@ -1,19 +1,22 @@
 body  { background-color: #f8f8f8; }
 table { border-collapse: collapse; }
+.table { --bs-table-bg: transparent; }
 
 /* Brand colors, hardcoded so a future Bootstrap upgrade can't silently change them */
 nav.navbar { background-color: #2196f3 !important; margin-bottom: 23px !important; }
+.navbar-brand { padding: 20.5px 15px !important; font-size: 17px !important; line-height: 23px !important; }
 
 .btn-primary                                             { color: #fff !important; background-color: #2196f3 !important; border-color: transparent !important; }
-.btn-primary:hover, .btn-primary:focus,
+.btn-primary:hover, .btn-primary:focus-visible,
 .btn-primary:active, .btn-primary.active                 { color: #fff !important; background-color: #0c7cd5 !important; border-color: transparent !important; }
 
 .btn-secondary                                            { color: #444 !important; background-color: #fff !important; border-color: transparent !important; }
-.btn-secondary:hover, .btn-secondary:focus,
-.btn-secondary:active, .btn-secondary.active              { color: #444 !important; background-color: #e6e6e6 !important; border-color: transparent !important; }
+.btn-secondary:hover, .btn-secondary:focus-visible,
+.btn-secondary:active, .btn-secondary.active,
+.btn-check:checked+.btn-secondary                         { color: #444 !important; background-color: #e6e6e6 !important; border-color: transparent !important; }
 
 .btn-danger                                               { color: #fff !important; background-color: #e51c23 !important; border-color: transparent !important; }
-.btn-danger:hover, .btn-danger:focus,
+.btn-danger:hover, .btn-danger:focus-visible,
 .btn-danger:active, .btn-danger.active                    { color: #fff !important; background-color: #c81419 !important; border-color: transparent !important; }
 
 .form-control        { background-color: transparent !important; border: 1px solid transparent !important; box-shadow: inset 0 1px 1px rgba(0,0,0,.075) !important; }
@@ -30,7 +33,7 @@ nav.navbar { background-color: #2196f3 !important; margin-bottom: 23px !importan
 
 #startForm, #joinForm { padding: 15px; }
 
-#game { width: 400px; margin: 0 auto 0 auto; }
+#game { width: 400px; margin: 0 auto 0 auto; padding-bottom: 20px; }
 
 /*
  * Title Bar

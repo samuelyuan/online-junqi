@@ -54,13 +54,12 @@
                                     <div class="field-group">
                                         <label>Play as</label>
                                         <div>
-                                            <div data-toggle="buttons" class="btn-group btn-group-toggle">
-                                                <label class="btn btn-secondary active">
-                                                    <input type="radio" name="player-color" value="blue" checked="checked">Blue
-                                                </label>
-                                                <label class="btn btn-secondary">
-                                                    <input type="radio" name="player-color" value="red">Red
-                                                </label>
+                                            <div class="btn-group" role="group">
+                                                <input type="radio" class="btn-check" name="player-color" id="player-color-blue" value="blue" checked="checked" autocomplete="off">
+                                                <label class="btn btn-secondary" for="player-color-blue">Blue</label>
+
+                                                <input type="radio" class="btn-check" name="player-color" id="player-color-red" value="red" autocomplete="off">
+                                                <label class="btn btn-secondary" for="player-color-red">Red</label>
                                             </div>
                                         </div>
                                     </div>

@@ -34,9 +34,9 @@ class GameUIManager {
     }
 
     initModals() {
-        const modalConfig = { show: false, keyboard: false, backdrop: 'static' };
-        this.gameOverMessage.modal(modalConfig);
-        this.forfeitPrompt.modal(modalConfig);
+        const modalConfig = { keyboard: false, backdrop: 'static' };
+        this.gameOverModal = new bootstrap.Modal(this.gameOverMessage.get(0), modalConfig);
+        this.forfeitModal = new bootstrap.Modal(this.forfeitPrompt.get(0), modalConfig);
     }
 
     setPlayerColor(color) {
@@ -63,15 +63,15 @@ class GameUIManager {
     showForfeitPrompt(callback) {
         this.forfeitPrompt.one('click', `#${ELEMENT_IDS.CANCEL_FORFEIT}`, () => {
             callback(false);
-            this.forfeitPrompt.modal('hide');
+            this.forfeitModal.hide();
         });
 
         this.forfeitPrompt.one('click', `#${ELEMENT_IDS.CONFIRM_FORFEIT}`, () => {
             callback(true);
-            this.forfeitPrompt.modal('hide');
+            this.forfeitModal.hide();
         });
 
-        this.forfeitPrompt.modal('show');
+        this.forfeitModal.show();
     }
 
     showGameOver(type) {
@@ -83,7 +83,7 @@ class GameUIManager {
 
         const [cls, text] = typeEntry;
         header.addClass(cls).text(text);
-        this.gameOverMessage.modal('show');
+        this.gameOverModal.show();
     }
 
     getElement(id) {
