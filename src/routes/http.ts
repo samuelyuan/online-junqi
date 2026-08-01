@@ -63,14 +63,9 @@ export class HttpRoutes {
       return null;
     }
 
-    // If Player Name consists only of whitespace, set as 'Player 1'
-    if (this.isWhitespace(req.body['player-name'])) {
-      req.body['player-name'] = 'Player 1';
-    }
-
     return {
       playerColor: req.body['player-color'],
-      playerName: req.body['player-name']
+      playerName: 'Anonymous'
     };
   };
 
@@ -92,14 +87,9 @@ export class HttpRoutes {
       return null;
     }
 
-    // If Player Name consists only of whitespace, set as 'Player 2'
-    if (this.isWhitespace(req.body['player-name'])) {
-      req.body['player-name'] = 'Player 2';
-    }
-
     return {
       gameID: req.body['game-id'],
-      playerName: req.body['player-name']
+      playerName: 'Anonymous'
     };
   };
 

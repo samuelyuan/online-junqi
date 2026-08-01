@@ -87,12 +87,10 @@ export interface ErrorResponse {
 // Form validation types
 export interface StartGameFormData {
   'player-color': 'red' | 'blue';
-  'player-name': string;
 }
 
 export interface JoinGameFormData {
   'game-id': string;
-  'player-name': string;
 }
 
 export interface ValidatedStartGameData {
