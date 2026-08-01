@@ -125,6 +125,47 @@ const finishSetup = function (this: GameIOSocket, gameID: string) {
   console.log(sess.playerName + ' finish setup in game ' + gameID);
 };
 
+/*
+Randomly shuffle the current player's own pieces during the setup phase.
+*/
+const shuffleSetup = function (this: GameIOSocket, gameID: string) {
+  const sess = getSession(this);
+  const debugInfo: DebugInfo = {
+    socketID: this.id,
+    event: 'shuffleSetup',
+    gameID: gameID,
+    session: sess
+  };
+
+  // Check if user has permission to access this game
+  if (gameID !== sess.gameID) {
+    console.log('ERROR: Access Denied', debugInfo);
+    this.emit('error', { message: "You have not joined this game" });
+    return;
+  }
+
+  // Lookup game in database
+  const game = DB?.find(gameID);
+  if (!game) {
+    console.log('ERROR: Game Not Found', debugInfo);
+    this.emit('error', { message: "Game not found" });
+    return;
+  }
+
+  // Shuffle player's pieces
+  const result = game.shuffleSetup(sess);
+  if (!result) {
+    console.log('ERROR: Failed to shuffle setup', debugInfo);
+    this.emit('error', { message: "Unable to shuffle pieces" });
+    return;
+  }
+
+  // Send filtered updates to all players in the game
+  sendFilteredUpdatesToGame(gameID, game);
+
+  console.log(sess.playerName + ' shuffled setup in game ' + gameID);
+};
+
 /**
  * Apply move to game
  * Emits an "update" event on success or an "error" event on failure
@@ -255,6 +296,7 @@ export function attach(io: GameIOServer, db: GameStore): void {
     // Attach the event handlers
     socket.on('join', join);
     socket.on('finishSetup', finishSetup);
+    socket.on('shuffleSetup', shuffleSetup);
     socket.on('move', move);
     socket.on('forfeit', forfeit);
     socket.on('disconnect', disconnect);

@@ -196,6 +196,30 @@ export class Game {
     }
 
     /**
+     * Randomly shuffle a player's own pieces during the setup phase
+     */
+    shuffleSetup(playerData: PlayerSession): boolean {
+        // Find player in question
+        const p = this.players.find(player => player.color === playerData.playerColor);
+        if (!p) { return false; }
+
+        // Check if player is actually joined
+        if (!p.joined) { return false; }
+
+        // Can't reshuffle after setup is finalized
+        if (p.isSetup || this.status !== GameStatus.PENDING) { return false; }
+
+        this.board.shufflePlayerPieces(p.color!);
+
+        // Regenerate valid swaps based on the new board configuration
+        this.validSwap = this.board.getSwapForAll();
+
+        this.modifiedOn = Date.now();
+
+        return true;
+    }
+
+    /**
      * Swap pieces during setup phase
      */
     swapPieces(moveString: string): boolean {

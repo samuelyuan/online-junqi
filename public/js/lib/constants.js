@@ -104,6 +104,7 @@ export const ELEMENT_IDS = {
     YOU: 'you',
     OPPONENT: 'opponent',
     FINISH_SETUP: 'finishSetup',
+    SHUFFLE_SETUP: 'shuffleSetup',
     FORFEIT: 'forfeit',
     CANCEL_FORFEIT: 'cancel-forfeit',
     CONFIRM_FORFEIT: 'confirm-forfeit'

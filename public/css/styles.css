@@ -49,6 +49,10 @@ nav.navbar { background-color: #2196f3 !important; margin-bottom: 23px !importan
   margin: 0 0 25px 0;
 }
 
+#setup-actions {
+  margin: 0 0 25px 0;
+}
+
 /*
  * Player Info
  */

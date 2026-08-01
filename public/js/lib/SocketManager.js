@@ -36,6 +36,10 @@ class SocketManager {
         this.socket.emit('finishSetup', gameID);
     }
 
+    shuffleSetup(gameID) {
+        this.socket.emit('shuffleSetup', gameID);
+    }
+
     forfeit(gameID) {
         this.socket.emit('forfeit', gameID);
     }

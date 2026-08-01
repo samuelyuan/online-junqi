@@ -111,6 +111,13 @@ const attachSetupHandlers = () => {
     uiManager.gameRoot.on('click', `#${ELEMENT_IDS.FINISH_SETUP}`, (ev) => {
         socketManager.finishSetup(gameID);
     });
+
+    // Randomly shuffle your own pieces
+    uiManager.gameRoot.on('click', `#${ELEMENT_IDS.SHUFFLE_SETUP}`, (ev) => {
+        uiManager.clearHighlights();
+        uiManager.clearMessages();
+        socketManager.shuffleSetup(gameID);
+    });
 };
 
 /**

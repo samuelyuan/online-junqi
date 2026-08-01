@@ -124,6 +124,54 @@ describe('Game', function () {
     });
   });
 
+  describe('#shuffleSetup()', function () {
+    var gameRedSide = new Game({
+      playerName: '',
+      playerColor: 'red'
+    });
+    var redPlayerSession: PlayerSession = {
+      playerName: '',
+      playerColor: 'red' as const,
+    };
+    var bluePlayerSession: PlayerSession = {
+      playerName: '',
+      playerColor: 'blue' as const,
+    }
+    gameRedSide.addPlayer(redPlayerSession);
+    gameRedSide.addPlayer(bluePlayerSession);
+
+    it('Player who has joined can shuffle their own setup', function () {
+      var status = gameRedSide.shuffleSetup(redPlayerSession);
+      assert.equal(status, true);
+    });
+
+    it('Player who has not joined cannot shuffle setup', function () {
+      var freshGame = new Game({
+        playerName: '',
+        playerColor: 'red'
+      });
+
+      var status = freshGame.shuffleSetup({
+        playerName: 'Player Not Joined',
+        playerColor: 'blue' as const
+      });
+      assert.equal(status, false);
+    });
+
+    it('Cannot shuffle after finishing setup', function () {
+      var finishedGame = new Game({
+        playerName: '',
+        playerColor: 'red'
+      });
+      finishedGame.addPlayer(redPlayerSession);
+      finishedGame.addPlayer(bluePlayerSession);
+      finishedGame.finishSetup(redPlayerSession);
+
+      var status = finishedGame.shuffleSetup(redPlayerSession);
+      assert.equal(status, false);
+    });
+  });
+
   describe('#finishSetup()', function () {
     var gameRedSide = new Game({
       playerName: '',
