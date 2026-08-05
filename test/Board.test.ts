@@ -96,6 +96,47 @@ describe('Board', function () {
         assert.equal(landminesOnHqRow < 3, true);
       }
     });
+
+    it('Restricts the HQ row center square and both non-flag corners appropriately', function () {
+      const HQ_ROW = ['a1', 'b1', 'c1', 'd1', 'e1'];
+      const centerAllowedRanks = [PieceRank.LIEUTENANT, PieceRank.LANDMINE];
+      const farCornerAllowedRanks = [PieceRank.CAPTAIN, PieceRank.LIEUTENANT, PieceRank.LANDMINE];
+      const nearCornerExcludedRanks = [PieceRank.FLAG, PieceRank.COMMANDER, PieceRank.GENERAL, PieceRank.BOMB, PieceRank.ENGINEER];
+
+      for (let i = 0; i < 50; i++) {
+        const board = new Board();
+        board.shufflePlayerPieces('blue');
+
+        const flagSquare = HQ_ROW.find((square) => board.boardState[square]!.getRank() === PieceRank.FLAG)!;
+        const nearFlagCorner = (flagSquare === 'b1' ? 'a' : 'e') + '1';
+        const farFlagCorner = (flagSquare === 'b1' ? 'e' : 'a') + '1';
+
+        // Center is stricter than the far corner: vacating it exposes both HQ squares at once
+        assert.equal(centerAllowedRanks.includes(board.boardState['c1']!.getRank()), true);
+        assert.equal(farCornerAllowedRanks.includes(board.boardState[farFlagCorner]!.getRank()), true);
+        assert.equal(nearCornerExcludedRanks.includes(board.boardState[nearFlagCorner]!.getRank()), false);
+
+        // Bomb is excluded from the entire HQ row, not just the front row
+        HQ_ROW.forEach((square) => {
+          assert.notEqual(board.boardState[square]!.getRank(), PieceRank.BOMB);
+        });
+      }
+    });
+
+    it('Keeps Engineer off the exposed a/c/e front-row squares, and stays valid', function () {
+      const validator = new BoardValidator();
+      const EXPOSED_FRONT_ROW = ['a6', 'c6', 'e6'];
+
+      for (let i = 0; i < 50; i++) {
+        const board = new Board();
+        board.shufflePlayerPieces('blue');
+
+        EXPOSED_FRONT_ROW.forEach((square) => {
+          assert.notEqual(board.boardState[square]!.getRank(), PieceRank.ENGINEER);
+        });
+        assert.equal(validator.validateBoard(board.boardState), true);
+      }
+    });
   });
 
   describe('#evaluateMove()', function () {

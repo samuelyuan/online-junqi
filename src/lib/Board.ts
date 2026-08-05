@@ -1,5 +1,6 @@
-import { BoardSquarePieceMap, BUNKER_SQUARES, HEADQUARTER_SQUARES, PLAYER1_BACK_ROW_RAIL, PLAYER2_BACK_ROW_RAIL, RAIL_LINES } from './BoardConstants';
+import { BoardSquarePieceMap, BUNKER_SQUARES, RAIL_LINES } from './BoardConstants';
 import { BoardGenerator } from './BoardGenerator';
+import { BoardShuffler } from './BoardShuffler';
 import { BoardValidator } from './BoardValidator';
 import {
   GameResult,
@@ -31,6 +32,7 @@ export class Board {
   nodeKeys: string[];
   railroadNetwork: RailroadNetwork;
   boardValidator: BoardValidator;
+  boardShuffler: BoardShuffler;
 
   /*
   Create new board to store pieces
@@ -46,6 +48,7 @@ export class Board {
     }
     this.nodeKeys = Object.keys(this.boardState);
     this.railroadNetwork = new RailroadNetwork(RAIL_LINES);
+    this.boardShuffler = new BoardShuffler(this.boardValidator);
   }
 
   /**
@@ -94,62 +97,12 @@ export class Board {
   }
 
   /**
-   * Randomly rearrange one player's pieces among their own squares. Keeps the
-   * result valid (flag in HQ, landmines in the back two rows, bombs off the
-   * front row) and avoids setups no rational player would choose: anything but
-   * a landmine/lieutenant in the non-flag HQ square (zero legal moves all game),
-   * or all 3 landmines on the HQ row (leaves the row in front of it unmined).
+   * Randomly rearrange one player's pieces among their own squares for the setup
+   * phase. See BoardShuffler for the placement rules this enforces.
    */
   shufflePlayerPieces(playerColor: string): void {
     const squares = this.getAllPlayerSquares(this.boardState, playerColor);
-    const remainingPieces = squares.map((square) => this.boardState[square]!);
-
-    const remainingSquares = new Set(squares);
-    const assignment: BoardSquarePieceMap = {};
-
-    // Assign the most constrained pieces/squares first, so unrestricted pieces
-    // are left to fill whatever pieces and squares remain.
-    const placeGroup = (matchesPiece: (piece: Piece) => boolean, candidateSquares: string[], maxCount: number = Infinity): void => {
-      const eligibleSquares = this.shuffleCopy(candidateSquares.filter((square) => remainingSquares.has(square)));
-      // Cap to available squares - a matcher can match more pieces than there are squares left.
-      const groupPieces = this.shuffleCopy(remainingPieces.filter(matchesPiece)).slice(0, Math.min(eligibleSquares.length, maxCount));
-
-      groupPieces.forEach((piece, i) => {
-        const square = eligibleSquares[i];
-        assignment[square] = piece;
-        remainingSquares.delete(square);
-        remainingPieces.splice(remainingPieces.indexOf(piece), 1);
-      });
-    };
-
-    const hqSquares = squares.filter((square) => HEADQUARTER_SQUARES.includes(square));
-    // Row in front of HQ - reserving one landmine here guarantees not all 3 end up on the HQ row.
-    const frontGuardRow = squares.filter((square) => PLAYER1_BACK_ROW_RAIL.includes(square) || PLAYER2_BACK_ROW_RAIL.includes(square));
-
-    placeGroup((piece) => piece.getRank() === PieceRank.FLAG, hqSquares);
-    placeGroup((piece) => piece.getRank() === PieceRank.LANDMINE, frontGuardRow, 1);
-    // Non-flag HQ square: only a landmine or a lieutenant is worth stranding there
-    placeGroup((piece) => piece.getRank() === PieceRank.LANDMINE || piece.getRank() === PieceRank.LIEUTENANT, hqSquares);
-
-    placeGroup((piece) => piece.getRank() === PieceRank.LANDMINE, squares.filter((square) => this.boardValidator.isValidLandminePosition(this.boardValidator.getBoardSquareRow(square))));
-    placeGroup((piece) => piece.getRank() === PieceRank.BOMB, squares.filter((square) => this.boardValidator.isValidBombPosition(this.boardValidator.getBoardSquareRow(square))));
-
-    // Remaining pieces have no placement restrictions
-    placeGroup(() => true, squares);
-
-    squares.forEach((square) => {
-      this.boardState[square] = assignment[square];
-    });
-  }
-
-  // Returns a new array containing the same elements in random order
-  private shuffleCopy<T>(items: T[]): T[] {
-    const copy = items.slice();
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
+    this.boardShuffler.shuffle(this.boardState, squares);
   }
 
   getPieceAtSquare(currentSquare: string): Piece | null {
