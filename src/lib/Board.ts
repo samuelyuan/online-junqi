@@ -209,12 +209,22 @@ export class Board {
     1. Flags can only be placed in one of two headquartes
     2. Landmines in back two rows
     3. Bomb cannot be in the front row
+
+    A swap moves two pieces at once, so both directions need checking: the piece
+    at `square` must be legal at `destination`, AND the piece currently at
+    `destination` must be legal at `square`. Checking only the first direction
+    would let a swap smuggle a restricted piece into an illegal square by trading 
+    it with an unrestricted one.
   */
   getSwapMoves(square: string, board: BoardSquarePieceMap): SwapMove[] {
     const piece: Piece = board[square]!;
     return this.getAllPlayerSquares(board, piece.getPieceColor())
       .filter((destination) => square !== destination) // skip itself
       .filter((destination) => this.boardValidator.isDestinationPositionValid(piece.getRank(), square, destination))
+      .filter((destination) => {
+        const destPiece = board[destination];
+        return !destPiece || this.boardValidator.isDestinationPositionValid(destPiece.getRank(), destination, square);
+      })
       .map((destination) => ({
         type: 'swap',
         startSquare: square,

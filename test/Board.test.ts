@@ -139,6 +139,25 @@ describe('Board', function () {
     });
   });
 
+  describe('#getSwapMoves()', function () {
+    it('Does not offer a swap that would misplace the other piece', function () {
+      // In the default layout, a6 holds an unrestricted blue Captain and
+      // a1 holds a blue Bomb. Swapping them is fine for the captain (no
+      // restrictions) but would put the bomb on a6 - the front row, which
+      // isValidBombPosition disallows. A swap moves both pieces at once,
+      // so it must not be offered from either square.
+      const board = new Board();
+      assert.equal(board.boardState['a1']!.getRank(), PieceRank.BOMB);
+      assert.notEqual(board.boardState['a6']!.getRank(), PieceRank.BOMB);
+
+      const swapsFromA6 = board.getSwapMoves('a6', board.boardState);
+      assert.equal(swapsFromA6.some((s) => s.endSquare === 'a1'), false);
+
+      const swapsFromA1 = board.getSwapMoves('a1', board.boardState);
+      assert.equal(swapsFromA1.some((s) => s.endSquare === 'a6'), false);
+    });
+  });
+
   describe('#evaluateMove()', function () {
     it('Evaluate move from a6 to a7', function () {
       const board = new Board();
