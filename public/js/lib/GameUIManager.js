@@ -133,10 +133,10 @@ class GameUIManager {
             this.setPlayerName(container, player);
             this.setPlayerStatus(container, player, activeColor, gameStatus);
 
-            // Check status
+            // Flag-captured status
             /*status.removeClass('label label-danger').text('');
-            if (player.inCheck) {
-                status.addClass('label label-danger').text('Check');
+            if (player.flagCaptured) {
+                status.addClass('label label-danger').text('Flag Captured');
             }*/
 
             // Captured pieces

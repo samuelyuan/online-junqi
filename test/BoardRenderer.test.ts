@@ -81,12 +81,12 @@ describe('BoardRenderer', function () {
 
     describe('#generateSquareIds()', function () {
         it('should generate correct square IDs for red player', function () {
-            const fileLabels = ['A', 'B', 'C', 'D', 'E'];
-            const rankLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+            const columnLabels = ['A', 'B', 'C', 'D', 'E'];
+            const rowLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
             const playerColor = 'red';
 
             // Get generated square IDs for red player
-            const squareIds = boardRenderer.generateSquareIds(fileLabels, rankLabels, playerColor);
+            const squareIds = boardRenderer.generateSquareIds(columnLabels, rowLabels, playerColor);
 
             // Check the first few square IDs for the red player
             assert.equal(squareIds[0], 'e1');  // Top-right corner should be 'e12' for red
@@ -96,12 +96,12 @@ describe('BoardRenderer', function () {
         });
 
         it('should generate correct square IDs for blue player', function () {
-            const fileLabels = ['A', 'B', 'C', 'D', 'E'];
-            const rankLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+            const columnLabels = ['A', 'B', 'C', 'D', 'E'];
+            const rowLabels = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
             const playerColor = 'blue';
 
             // Get generated square IDs for blue player
-            const squareIds = boardRenderer.generateSquareIds(fileLabels, rankLabels, playerColor);
+            const squareIds = boardRenderer.generateSquareIds(columnLabels, rowLabels, playerColor);
 
             // Check the first few square IDs for the blue player
             assert.equal(squareIds[0], 'a12');   // Top-left corner should be 'a1' for blue

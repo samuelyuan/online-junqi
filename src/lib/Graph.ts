@@ -123,19 +123,19 @@ export class Graph {
    */
   transformSquare(square: string, transform: TransformOffset): string | null {
     // Parse square
-    const file = square[0];
-    const rank = parseInt(square.substring(1, square.length), 10);
+    const column = square[0];
+    const row = parseInt(square.substring(1, square.length), 10);
 
     // Apply transform
-    const destFile = Graph.alpha2num(file) + transform.x;
-    const destRank = rank + transform.y;
+    const destColumn = Graph.alpha2num(column) + transform.x;
+    const destRow = row + transform.y;
 
     // Check boundaries
-    if (destFile < 1 || destFile > 5) { return null; }
-    if (destRank < 1 || destRank > 12) { return null; }
+    if (destColumn < 1 || destColumn > 5) { return null; }
+    if (destRow < 1 || destRow > 12) { return null; }
 
     // Return new square
-    return Graph.num2alpha(destFile) + destRank;
+    return Graph.num2alpha(destColumn) + destRow;
   };
 
   // Add an unconnected edge between node1 and node2

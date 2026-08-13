@@ -28,8 +28,8 @@ export class Game {
         this.activePlayer = null;
 
         this.players = [
-            { color: null, name: null, joined: false, isSetup: false, inCheck: false, hasCommander: true, hasMoveablePieces: true, forfeited: false },
-            { color: null, name: null, joined: false, isSetup: false, inCheck: false, hasCommander: true, hasMoveablePieces: true, forfeited: false }
+            { color: null, name: null, joined: false, isSetup: false, flagCaptured: false, hasCommander: true, hasMoveablePieces: true, forfeited: false },
+            { color: null, name: null, joined: false, isSetup: false, flagCaptured: false, hasCommander: true, hasMoveablePieces: true, forfeited: false }
         ];
 
         this.board = new Board();
@@ -326,21 +326,21 @@ export class Game {
             this.validMoves = this.board.getMovesForPlayer(inactivePlayer.color);
         }
 
-        // Set check status for both players
+        // Set flag-captured status for both players
         this.players.forEach((p: PlayerStatus) => {
             if (p.color) {
-                p.inCheck = this.board.isPlayerFlagCaptured(p.color);
+                p.flagCaptured = this.board.isPlayerFlagCaptured(p.color);
                 p.hasCommander = this.board.isCommanderAlive(p.color);
             }
         });
 
-        // Test for checkmate or stalemate
+        // Test for flag capture or no moveable pieces remaining
         if (inactivePlayer && this.validMoves.length === 0) {
             inactivePlayer.hasMoveablePieces = false;
         }
 
-        if (inactivePlayer && inactivePlayer.inCheck) {
-            this.status = GameStatus.CHECKMATE;
+        if (inactivePlayer && inactivePlayer.flagCaptured) {
+            this.status = GameStatus.FLAG_CAPTURED;
         }
 
         if (inactivePlayer && inactivePlayer.hasMoveablePieces === false) {

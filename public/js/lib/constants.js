@@ -78,7 +78,7 @@ export const MOVE_SYMBOLS = {
 
 // Game status
 export const GAME_STATUS = {
-    CHECKMATE: 'checkmate',
+    FLAG_CAPTURED: 'flag_captured',
     NOPIECES: 'nopieces',
     FORFEIT: 'forfeit',
     PENDING: 'pending'
@@ -86,8 +86,8 @@ export const GAME_STATUS = {
 
 // Game over types
 export const GAME_OVER_TYPES = {
-    CHECKMATE_WIN: 'checkmate-win',
-    CHECKMATE_LOSE: 'checkmate-lose',
+    FLAG_CAPTURED_WIN: 'flag-captured-win',
+    FLAG_CAPTURED_LOSE: 'flag-captured-lose',
     FORFEIT_WIN: 'forfeit-win',
     FORFEIT_LOSE: 'forfeit-lose',
     NOPIECES_WIN: 'nopieces-win',
@@ -120,8 +120,8 @@ export const SELECTORS = {
 };
 
 // Board labels
-export const FILE_LABELS = ['A', 'B', 'C', 'D', 'E'];
-export const RANK_LABELS = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+export const COLUMN_LABELS = ['A', 'B', 'C', 'D', 'E'];
+export const ROW_LABELS = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
 // Piece rank values
 export const RANK_HIDDEN = 'hidden';
@@ -134,8 +134,8 @@ export const ERROR_MESSAGES = {
 
 // Game over messages (matching GameUIManager structure)
 export const GAME_OVER_MESSAGES = {
-    [GAME_OVER_TYPES.CHECKMATE_WIN]: ['alert-success', 'Captured Flag'],
-    [GAME_OVER_TYPES.CHECKMATE_LOSE]: ['alert-danger', 'Flag Lost'],
+    [GAME_OVER_TYPES.FLAG_CAPTURED_WIN]: ['alert-success', 'Captured Flag'],
+    [GAME_OVER_TYPES.FLAG_CAPTURED_LOSE]: ['alert-danger', 'Flag Lost'],
     [GAME_OVER_TYPES.FORFEIT_WIN]: ['alert-success', 'Your opponent has surrendered'],
     [GAME_OVER_TYPES.FORFEIT_LOSE]: ['alert-danger', 'You have surrendered'],
     [GAME_OVER_TYPES.NOPIECES_WIN]: ['alert-success', 'Your opponent has no moveable pieces'],

@@ -30,7 +30,7 @@ export interface PlayerStatus {
   name: string | null;
   joined: boolean;
   isSetup: boolean;
-  inCheck: boolean;
+  flagCaptured: boolean;
   hasCommander: boolean;
   hasMoveablePieces: boolean;
   forfeited: boolean;
@@ -41,7 +41,7 @@ export enum GameStatus {
   ONGOING = "ongoing",
   FORFEIT = "forfeit",
   NO_PIECES = "nopieces",
-  CHECKMATE = "checkmate"
+  FLAG_CAPTURED = "flag_captured"
 }
 
 // A single square as sent to a specific client: opponent ranks are hidden unless revealed

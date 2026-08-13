@@ -4,8 +4,8 @@ import {
     COLOR_CHAR_TO_NAME,
     RANK_PREFIX,
     RANK_HIDDEN,
-    FILE_LABELS,
-    RANK_LABELS,
+    COLUMN_LABELS,
+    ROW_LABELS,
     MIN_RANK,
     MAX_RANK,
     COLOR_CLASSES
@@ -86,9 +86,9 @@ export class BoardRenderer {
 
   // Assign square IDs and labels based on player's perspective
   assignSquareIds(squares, playerColor) {
-    const fileLabels = [...FILE_LABELS];
-    const rankLabels = [...RANK_LABELS];
-    const squareIDs = this.generateSquareIds(fileLabels, rankLabels, playerColor);
+    const columnLabels = [...COLUMN_LABELS];
+    const rowLabels = [...ROW_LABELS];
+    const squareIDs = this.generateSquareIds(columnLabels, rowLabels, playerColor);
 
     squares.each((i) => {
       $(squares[i]).attr('id', squareIDs[i]);
@@ -96,26 +96,26 @@ export class BoardRenderer {
   }
 
   // Generate square IDs based on player color (mirroring for opponent's perspective)
-  generateSquareIds(fileLabels, rankLabels, playerColor) {
-    // Generate square IDs programmatically: for each rank, for each file
+  generateSquareIds(columnLabels, rowLabels, playerColor) {
+    // Generate square IDs programmatically: for each row, for each column
     const squareIDs = [];
-    for (const rank of rankLabels) {
-      for (const file of fileLabels) {
-        squareIDs.push(`${file.toLowerCase()}${rank}`);
+    for (const row of rowLabels) {
+      for (const column of columnLabels) {
+        squareIDs.push(`${column.toLowerCase()}${row}`);
       }
     }
 
     if (playerColor === COLORS.RED) {
-      fileLabels.reverse();
-      rankLabels.reverse();
+      columnLabels.reverse();
+      rowLabels.reverse();
       squareIDs.reverse();
     }
 
-    // Set file and rank labels
-    /* $('.top-edge').each(function(i) { $(this).text(fileLabels[i]); });
-     $('.right-edge').each(function(i) { $(this).text(rankLabels[i]); });
-     $('.bottom-edge').each(function(i) { $(this).text(fileLabels[i]); });
-     $('.left-edge').each(function(i) { $(this).text(rankLabels[i]); });*/
+    // Set column and row labels
+    /* $('.top-edge').each(function(i) { $(this).text(columnLabels[i]); });
+     $('.right-edge').each(function(i) { $(this).text(rowLabels[i]); });
+     $('.bottom-edge').each(function(i) { $(this).text(columnLabels[i]); });
+     $('.left-edge').each(function(i) { $(this).text(rowLabels[i]); });*/
 
     return squareIDs;
   }

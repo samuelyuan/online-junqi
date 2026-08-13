@@ -47,15 +47,15 @@ export class BoardShuffler {
     // HQ row's other 3 squares: near-flag corner is a fair reserve position; center and
     // far corner aren't (a piece there either gets stuck, or freeing it telegraphs which
     // HQ is real). Center is worse still (exposes both HQ squares at once), hence the
-    // tighter limit. HQ squares are always 'b'/'d' files, so center/corners are built
+    // tighter limit. HQ squares are always 'b'/'d' columns, so center/corners are built
     // directly rather than derived by elimination over the row.
     const flagSquare = hqSquares.find((square) => assignment[square]?.getRank() === PieceRank.FLAG)!;
     const hqRow = this.boardValidator.getBoardSquareRow(flagSquare);
     const centerSquare = `c${hqRow}`;
-    const nearFlagFile = flagSquare[0] === 'b' ? 'a' : 'e';
-    const farFlagFile = nearFlagFile === 'a' ? 'e' : 'a';
-    const nearFlagCorner = `${nearFlagFile}${hqRow}`;
-    const farFlagCorner = `${farFlagFile}${hqRow}`;
+    const nearFlagColumn = flagSquare[0] === 'b' ? 'a' : 'e';
+    const farFlagColumn = nearFlagColumn === 'a' ? 'e' : 'a';
+    const nearFlagCorner = `${nearFlagColumn}${hqRow}`;
+    const farFlagCorner = `${farFlagColumn}${hqRow}`;
 
     placeGroup((piece) => piece.getRank() === PieceRank.LANDMINE || piece.getRank() === PieceRank.LIEUTENANT, [centerSquare]);
     placeGroup((piece) => [PieceRank.CAPTAIN, PieceRank.LIEUTENANT, PieceRank.LANDMINE].includes(piece.getRank()), [farFlagCorner]);
@@ -64,7 +64,7 @@ export class BoardShuffler {
     placeGroup((piece) => ![PieceRank.FLAG, PieceRank.COMMANDER, PieceRank.GENERAL, PieceRank.BOMB, PieceRank.ENGINEER].includes(piece.getRank()), [nearFlagCorner]);
 
     // a/c/e front-row squares have a direct edge to the enemy's front row (only those
-    // 3 file pairs, per Graph.ts) - earliest contact point, bad for Engineer (needed
+    // 3 column pairs, per Graph.ts) - earliest contact point, bad for Engineer (needed
     // alive for mines later). Ordinary combat piece specifically, not just "not
     // Engineer" - Landmine/Bomb are still unplaced and have their own row rules.
     const exposedFrontRow = squares.filter((square) => FRONT_ROW_SQUARES.includes(square) && ['a', 'c', 'e'].includes(square[0]));

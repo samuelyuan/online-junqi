@@ -214,13 +214,13 @@ const update = () => {
     // Identify you and opponent
     const { you, opponent } = identifyPlayers(gameState, playerColor);
 
-    // Test for checkmate
-    if (gameState.status === GAME_STATUS.CHECKMATE) {
-        if (opponent.inCheck) { uiManager.showGameOver(GAME_OVER_TYPES.CHECKMATE_WIN); }
-        if (you.inCheck) { uiManager.showGameOver(GAME_OVER_TYPES.CHECKMATE_LOSE); }
+    // Test for flag capture
+    if (gameState.status === GAME_STATUS.FLAG_CAPTURED) {
+        if (opponent.flagCaptured) { uiManager.showGameOver(GAME_OVER_TYPES.FLAG_CAPTURED_WIN); }
+        if (you.flagCaptured) { uiManager.showGameOver(GAME_OVER_TYPES.FLAG_CAPTURED_LOSE); }
     }
 
-    // Test for stalemate
+    // Test for no moveable pieces remaining
     if (gameState.status === GAME_STATUS.NOPIECES) {
         if (!opponent.hasMoveablePieces) { uiManager.showGameOver(GAME_OVER_TYPES.NOPIECES_WIN); }
         if (!you.hasMoveablePieces) { uiManager.showGameOver(GAME_OVER_TYPES.NOPIECES_LOSE); }
